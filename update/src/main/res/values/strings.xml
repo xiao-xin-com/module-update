@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Update</string>
+    <string name="positive">确定</string>
+    <string name="updatehint">升级提示</string>
+    <string name="negative">取消</string>
+</resources>
