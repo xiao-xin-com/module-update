@@ -254,15 +254,18 @@ public class XXNotifyUtil {
      * @param content
      */
     public void notify_progress(PendingIntent pendingIntent, int smallIcon,
-                                String ticker, String title, String content, boolean sound, boolean vibrate, boolean lights) {
+                                String ticker, String title, String content,
+                                boolean sound, boolean vibrate, boolean lights,
+                                int max, int progress, boolean indeterminate) {
 
         setCompatBuilder(pendingIntent, smallIcon, ticker, title, content, sound, vibrate, lights);
         /*
          * 因为进度条要实时更新通知栏也就说要不断的发送新的提示，所以这里不建议开启通知声音。
 		 * 这里是作为范例，给大家讲解下原理。所以发送通知后会听到多次的通知声音。
 		 */
-
-        new Thread(new Runnable() {
+        cBuilder.setProgress(max, progress, indeterminate);
+        sent();
+       /* new Thread(new Runnable() {
             @Override
             public void run() {
                 int incr;
@@ -281,7 +284,7 @@ public class XXNotifyUtil {
                 cBuilder.setContentText("下载完成").setProgress(0, 0, false);
                 sent();
             }
-        }).start();
+        }).start();*/
     }
 
     /**

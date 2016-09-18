@@ -41,8 +41,8 @@ public class XXApplication extends Application {
                 .setSilence(false)
                 .setTargetFile(new File(Environment.getExternalStorageDirectory(), "xiaoxintong.apk").getAbsolutePath())
                 .setVersionInfoProvider(versionInfoProvider)
-                .setUpdateUrl("http://192.168.1.76:82/xiaoxintong.json")
-                .setApkDownloadUrl("http://192.168.1.76:82/xiaoxintong.json")
+                .setUpdateUrl("http://192.168.1.76/xiaoxintong.json")
+                .setApkDownloadUrl("http://192.168.1.76/xiaoxintong.apk")
                 .build();
         XXUpdateManager.init(this, configuration);
     }
