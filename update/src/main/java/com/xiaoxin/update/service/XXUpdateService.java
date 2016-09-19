@@ -47,8 +47,9 @@ public class XXUpdateService extends Service {
     public IBinder onBind(Intent intent) {
         XXLogUtil.d("onBind() called with: intent = [" + intent + "]");
         if (versionInfo != null) {
-            if (!XXUpdateManager.isSilence()) {
-                showDialog(this, versionInfo.getUpdateInfo());
+            if (!XXUpdateManager.isSilence() && XXUpdateManager.getActivityContext() != null &&
+                    XXUpdateManager.getActivityContext().get() != null) {
+                showDialog(XXUpdateManager.getActivityContext().get(), versionInfo.getUpdateInfo());
             }
         }
         return new UpdateBinder();
