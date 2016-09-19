@@ -31,7 +31,7 @@ import com.xiaoxin.update.util.XXLogUtil;
 import com.xiaoxin.update.util.XXUtil;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
+import java.io.IOException;
 
 public class XXUpdateService extends Service {
     private static final String TAG = "XXUpdateService";
@@ -46,13 +46,19 @@ public class XXUpdateService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         XXLogUtil.d("onBind() called with: intent = [" + intent + "]");
+        showUpdateDialog();
+        return new UpdateBinder();
+    }
+
+    private void showUpdateDialog() {
         if (versionInfo != null) {
             if (!XXUpdateManager.isSilence() && XXUpdateManager.getActivityContext() != null &&
                     XXUpdateManager.getActivityContext().get() != null) {
-                showDialog(XXUpdateManager.getActivityContext().get(), versionInfo.getUpdateInfo());
+                if (XXGetAppInfo.getAppVersionCode(this) < versionInfo.getVersionCode()) {
+                    showDialog(XXUpdateManager.getActivityContext().get(), versionInfo.getUpdateInfo());
+                }
             }
         }
-        return new UpdateBinder();
     }
 
     @Override
@@ -118,10 +124,7 @@ public class XXUpdateService extends Service {
                     if (XXUpdateManager.isSilence()) {
                         downloadOrInstall();
                     } else {
-                        WeakReference<Context> activityContext = XXUpdateManager.getActivityContext();
-                        if (activityContext != null && activityContext.get() != null) {
-                            showDialog(activityContext.get(), versionInfo.getUpdateInfo());
-                        }
+                        showUpdateDialog();
                     }
                 }
             }
@@ -143,8 +146,9 @@ public class XXUpdateService extends Service {
         if (TextUtils.isEmpty(apkDownloadUrl) || TextUtils.isEmpty(targetFile)) {
             return;
         }
-        if (new File(targetFile).exists()) {
-
+        File file = new File(targetFile);
+        if (file.exists()) {
+            file.delete();
         }
         if (!TextUtils.isEmpty(apkDownloadUrl) && !TextUtils.isEmpty(targetFile)) {
             downloadId = FileDownloader.getImpl().create(apkDownloadUrl).
@@ -192,16 +196,24 @@ public class XXUpdateService extends Service {
                 if (XXUpdateManager.isSilence()) {
                     if (XXCmdUtil.isRoot()) {
                         try {
-                            XXUtil.slientInstall(targetFile);
+                            slientInstall(targetFile);
                         } catch (Exception e) {
-                            XXUtil.startInstall(XXUpdateService.this, new File(targetFile));
+                            startInstall(targetFile);
                         }
                     } else {
-                        XXUtil.startInstall(XXUpdateService.this, new File(targetFile));
+                        startInstall(targetFile);
                     }
                 } else {
-                    XXUtil.startInstall(XXUpdateService.this, new File(targetFile));
+                    startInstall(targetFile);
                 }
+            }
+
+            private void slientInstall(String targetFile) throws IOException, InterruptedException {
+                XXUtil.slientInstall(targetFile);
+            }
+
+            private void startInstall(String targetFile) {
+                XXUtil.startInstall(XXUpdateService.this, new File(targetFile));
             }
         }.start();
     }
