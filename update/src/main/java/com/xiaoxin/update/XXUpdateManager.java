@@ -138,13 +138,21 @@ public class XXUpdateManager {
     public static void onResume(Context context) {
         if (activityContext == null || activityContext.get() == null) {
             activityContext = new WeakReference<>(context);
-            Intent intent = new Intent(context, XXUpdateService.class);
-            context.bindService(intent, conn, Context.BIND_AUTO_CREATE);
+//            bindUpdateService(context);
         }
+    }
+
+    private static void bindUpdateService(Context context) {
+        Intent intent = new Intent(context, XXUpdateService.class);
+        context.bindService(intent, conn, Context.BIND_AUTO_CREATE);
     }
 
     public static void onPause(Context context) {
         activityContext.clear();
+//        unBindUpdateService(context);
+    }
+
+    private static void unBindUpdateService(Context context) {
         context.unbindService(conn);
     }
 

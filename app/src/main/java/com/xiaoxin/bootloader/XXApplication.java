@@ -38,7 +38,7 @@ public class XXApplication extends Application {
         x.Ext.setDebug(DEBUG);
         XXUpdateConfiguration configuration = new XXUpdateConfiguration.Builder()
                 .setDebug(DEBUG)
-                .setSilence(false)
+                .setSilence(true)
                 .setTargetFile(new File(Environment.getExternalStorageDirectory(), "xiaoxintong.apk").getAbsolutePath())
                 .setVersionInfoProvider(versionInfoProvider)
                 .setUpdateUrl("http://192.168.1.76/xiaoxintong.json")

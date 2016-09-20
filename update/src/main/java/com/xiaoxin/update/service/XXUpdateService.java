@@ -191,16 +191,14 @@ public class XXUpdateService extends Service {
             @Override
             public void run() {
                 if (isNeedDownload()) return;
-                //开始安装，如果选择静默安装，并且手机已经root，选择pm安装，其他情况全部打开android安装界面
                 String targetFile = XXUpdateManager.getTargetFile();
-                if (XXUpdateManager.isSilence()) {
-                    if (XXCmdUtil.isRoot()) {
-                        try {
-                            slientInstall(targetFile);
-                        } catch (Exception e) {
-                            startInstall(targetFile);
-                        }
-                    } else {
+                if (XXUpdateManager.isSilence() &&
+                        (XXUpdateManager.getActivityContext() == null || XXUpdateManager.getActivityContext().get() == null) &&
+                        XXCmdUtil.isRoot()) {
+                    try {
+                        //选择静默安装，并且当前用户不在操作，手机成功root，选择静默升级，升级失败自动转到普通升级。其他情况也是普通升级
+                        slientInstall(targetFile);
+                    } catch (Exception e) {
                         startInstall(targetFile);
                     }
                 } else {
