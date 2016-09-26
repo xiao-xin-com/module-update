@@ -19,7 +19,6 @@ import com.android.volley.toolbox.Volley;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadSampleListener;
 import com.liulishuo.filedownloader.FileDownloader;
-import com.xiaoxin.update.R;
 import com.xiaoxin.update.XXUpdateManager;
 import com.xiaoxin.update.XXVersionInfoProvider;
 import com.xiaoxin.update.bean.XXVersionInfo;
@@ -262,14 +261,14 @@ public class XXUpdateService extends Service {
     //提示升级显示对话框
     private void showDialog(Context context, String updateInfo) {
         XXLogUtil.d("showDialog() called with: context = [" + context + "], updateInfo = [" + updateInfo + "]");
-        AlertDialog dialog = new AlertDialog.Builder(context).setTitle(R.string.updatehint).
-                setMessage(updateInfo).setPositiveButton(R.string.positive, new DialogInterface.OnClickListener() {
+        AlertDialog dialog = new AlertDialog.Builder(context).setTitle("升级提示").
+                setMessage(updateInfo).setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 downloadOrInstall();
                 dialog.dismiss();
             }
-        }).setNegativeButton(R.string.negative, new DialogInterface.OnClickListener() {
+        }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
