@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import com.liulishuo.filedownloader.FileDownloader;
 import com.xiaoxin.update.config.XXUpdateConfiguration;
 import com.xiaoxin.update.listener.XXDownloadListener;
 import com.xiaoxin.update.service.XXUpdateService;
@@ -41,6 +42,7 @@ public class XXUpdateManager {
         if (context == null || configuration == null) {
             throw new NullPointerException();
         }
+        FileDownloader.init(context.getApplicationContext());
         XXUpdateManager.context = context.getApplicationContext();
         XXUpdateManager.configuration = configuration;
         startUpdateService();

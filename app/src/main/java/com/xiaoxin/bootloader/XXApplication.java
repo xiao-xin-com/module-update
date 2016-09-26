@@ -33,7 +33,7 @@ public class XXApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        FileDownloader.init(getApplicationContext());
+
         x.Ext.init(this);
         x.Ext.setDebug(DEBUG);
         XXUpdateConfiguration configuration = new XXUpdateConfiguration.Builder()
