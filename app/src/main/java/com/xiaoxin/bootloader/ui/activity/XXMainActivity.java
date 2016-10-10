@@ -19,6 +19,7 @@ public class XXMainActivity extends XXBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+        XXUpdateManager.check(this);
     }
 
     private void initView() {
