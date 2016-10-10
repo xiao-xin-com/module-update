@@ -3,8 +3,10 @@ package com.xiaoxin.update.config;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import com.xiaoxin.update.XXDefaultVersionProvider;
 import com.xiaoxin.update.XXVersionInfoProvider;
 import com.xiaoxin.update.listener.XXDownloadListener;
+import com.xiaoxin.update.util.XXCmdUtil;
 import com.xiaoxin.update.util.XXFileUtil;
 
 /**
@@ -27,6 +29,9 @@ public class XXUpdateConfiguration {
 
     public XXUpdateConfiguration setVersionInfoProvider(XXVersionInfoProvider versionInfoProvider) {
         this.versionInfoProvider = versionInfoProvider;
+        if (this.versionInfoProvider == null) {
+            this.versionInfoProvider = new XXDefaultVersionProvider();
+        }
         return this;
     }
 
@@ -122,7 +127,9 @@ public class XXUpdateConfiguration {
         }
 
         public Builder setSilence(boolean silence) {
-            this.silence = silence;
+            if (XXCmdUtil.isRoot()) {
+                this.silence = silence;
+            }
             return this;
         }
 
