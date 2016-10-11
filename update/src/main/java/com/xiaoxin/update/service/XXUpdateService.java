@@ -30,12 +30,15 @@ import com.xiaoxin.update.net.XXStringRequest;
 import com.xiaoxin.update.util.XXCmdUtil;
 import com.xiaoxin.update.util.XXGetAppInfo;
 import com.xiaoxin.update.util.XXLogUtil;
+import com.xiaoxin.update.util.XXUITask;
 import com.xiaoxin.update.util.XXUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class XXUpdateService extends Service {
     private static final String TAG = "XXUpdateService";
@@ -102,6 +105,24 @@ public class XXUpdateService extends Service {
         registerUpdateReceiver();
         //在服务开启的时候就去检测有没有版本要更新
         checkUpdateInfo();
+        timerCheck();
+    }
+
+    private Timer timer;
+
+    private void timerCheck() {
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                XXUITask.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        check();
+                    }
+                });
+            }
+        }, 1000 * 60 * 60, 1000 * 60 * 60 * 6);
     }
 
     private void registerUpdateReceiver() {
@@ -348,6 +369,10 @@ public class XXUpdateService extends Service {
 
         if (downloadId != -1) {
             FileDownloader.getImpl().pause(downloadId);
+        }
+
+        if (timer != null) {
+            timer.cancel();
         }
         unRegisterUpdateReceiver();
     }
