@@ -6,8 +6,6 @@ import android.os.Environment;
 import com.xiaoxin.update.XXUpdateManager;
 import com.xiaoxin.update.config.XXUpdateConfiguration;
 
-import org.xutils.x;
-
 import java.io.File;
 
 import static com.xiaoxin.bootloader.util.XXJsonUtil.versionInfoProvider;
@@ -33,15 +31,13 @@ public class XXApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        x.Ext.init(this);
-        x.Ext.setDebug(DEBUG);
         XXUpdateConfiguration configuration = new XXUpdateConfiguration.Builder()
                 .setDebug(DEBUG)
                 .setSilence(false)
                 .setTargetFile(new File(Environment.getExternalStorageDirectory(), "xiaoxintong.apk").getAbsolutePath())
                 .setVersionInfoProvider(versionInfoProvider)
-                .setUpdateUrl("http://192.168.0.105/update.json")
-                .setApkDownloadUrl("http://192.168.0.105/update.apk")
+                .setUpdateUrl("http://192.168.1.76/update.json")
+                .setApkDownloadUrl("http://192.168.1.76/update.apk")
                 .build();
         XXUpdateManager.init(this, configuration);
     }
