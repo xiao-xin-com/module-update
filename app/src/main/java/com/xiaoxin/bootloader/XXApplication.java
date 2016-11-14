@@ -1,14 +1,14 @@
 package com.xiaoxin.bootloader;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Environment;
 
 import com.xiaoxin.update.XXUpdateManager;
 import com.xiaoxin.update.config.XXUpdateConfiguration;
 
 import java.io.File;
-
-import static com.xiaoxin.bootloader.util.XXJsonUtil.versionInfoProvider;
 
 
 /**
@@ -34,12 +34,26 @@ public class XXApplication extends Application {
         XXUpdateConfiguration configuration = new XXUpdateConfiguration.Builder()
                 .setDebug(DEBUG)
                 .setSilence(false)
-                .setTargetFile(new File(Environment.getExternalStorageDirectory(), "xiaoxintong.apk").getAbsolutePath())
-                .setVersionInfoProvider(versionInfoProvider)
-                .setUpdateUrl("http://192.168.1.76/update.json")
-                .setApkDownloadUrl("http://192.168.1.76/update.apk")
+                .setShowUI(true)
+                .setIcon(R.mipmap.friends)
+                .setTargetFile(new File(Environment.getExternalStorageDirectory(), "update.apk").getAbsolutePath())
+//                .setVersionInfoProvider(versionInfoProvider)
+                .setUpdateUrl(getUpdateUrl(this))
+                .setApkDownloadUrl("http://120.76.232.3:1337/download/update_test_1114.apk")
                 .build();
         XXUpdateManager.init(this, configuration);
+    }
+
+    public static String getUpdateUrl(Context context) {
+        try {
+            return new StringBuilder("http://120.76.232.3:1337/appVersion/verify?")
+                    .append("packageName=").append(context.getPackageName()).append("&")
+                    .append("platform=Android&versionCode=")
+                    .append(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode)
+                    .toString();
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
     }
 
     @Override

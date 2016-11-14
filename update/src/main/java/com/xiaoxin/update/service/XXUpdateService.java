@@ -1,12 +1,16 @@
 package com.xiaoxin.update.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -30,6 +34,7 @@ import com.xiaoxin.update.net.XXStringRequest;
 import com.xiaoxin.update.util.XXCmdUtil;
 import com.xiaoxin.update.util.XXGetAppInfo;
 import com.xiaoxin.update.util.XXLogUtil;
+import com.xiaoxin.update.util.XXNotifyUtil;
 import com.xiaoxin.update.util.XXUITask;
 import com.xiaoxin.update.util.XXUtil;
 
@@ -66,6 +71,8 @@ public class XXUpdateService extends Service {
 
     //从服务器获取最新版本的请求
     private Request updateRequest;
+    private String applicationLable;
+    private int applicationIcon;
 
     //有activity绑定时，如果是提示升级，而且版本信息下载完了，则去显示Dialog
     @Override
@@ -100,12 +107,25 @@ public class XXUpdateService extends Service {
     public void onCreate() {
         XXLogUtil.d("onCreate() called");
         super.onCreate();
+        initApplicationInfo();
         //初始化Volley
         initVolley();
         registerUpdateReceiver();
         //在服务开启的时候就去检测有没有版本要更新
         checkUpdateInfo();
         timerCheck();
+    }
+
+    private void initApplicationInfo() {
+        try {
+            PackageManager packageManager = getPackageManager();
+            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(getPackageName(), 0);
+            applicationIcon = XXUpdateManager.getIcon();
+            applicationLable = (String) packageManager.getApplicationLabel(applicationInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            applicationIcon = android.R.drawable.sym_def_app_icon;
+            applicationLable = getPackageName();
+        }
     }
 
     private Timer timer;
@@ -244,12 +264,20 @@ public class XXUpdateService extends Service {
             XXLogUtil.d("started() called with: task = [" + task + "]");
             stateMap.put(task.getId(), true);
             dispatchDownloadStart();
+            if (XXUpdateManager.isShowUI() && !XXUpdateManager.isSilence()) {
+                XXNotifyUtil.create(XXUpdateService.this, task.getId()).notify_progress(null,
+                        applicationIcon, "开始升级", applicationLable, "开始下载", false, false, false, 0, 100, false);
+            }
         }
 
         @Override
         protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) {
             XXLogUtil.d("progress() called with: task = [" + task + "], soFarBytes = [" + soFarBytes + "], totalBytes = [" + totalBytes + "]");
             dispatchDownloadProgress(soFarBytes, totalBytes);
+            if (XXUpdateManager.isShowUI() && !XXUpdateManager.isSilence()) {
+                XXNotifyUtil.create(XXUpdateService.this, task.getId()).notify_progress(null,
+                        applicationIcon, "开始升级", applicationLable, "正在下载...", false, false, false, totalBytes, soFarBytes, false);
+            }
         }
 
         @Override
@@ -257,6 +285,14 @@ public class XXUpdateService extends Service {
             XXLogUtil.d("completed() called with: task = [" + task + "]");
             stateMap.put(task.getId(), false);
             dispatchDownloadComplete();
+            if (XXUpdateManager.isShowUI() && !XXUpdateManager.isSilence()) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setDataAndType(Uri.parse("file://" + task.getPath()), "application/vnd.android.package-archive");
+                PendingIntent pendingIntent = PendingIntent.getActivity(XXUpdateService.this, task.getId(), intent, 0);
+                XXNotifyUtil.create(XXUpdateService.this, task.getId()).notify_progress(pendingIntent,
+                        applicationIcon, "开始升级", applicationLable, "下载完成", false, false, false, 100, 100, false);
+            }
         }
     };
 

@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import static android.R.attr.x;
+
 @SuppressLint("NewApi")
 public class XXNotifyUtil {
 
@@ -38,6 +40,10 @@ public class XXNotifyUtil {
         cBuilder = new NotificationCompat.Builder(mContext);
     }
 
+    public static XXNotifyUtil create(Context context, int ID) {
+        return new XXNotifyUtil(context, ID);
+    }
+
     /**
      * 设置在顶部通知栏中的各种信息
      *
@@ -57,7 +63,6 @@ public class XXNotifyUtil {
         cBuilder.setContentIntent(pendingIntent);// 该通知要启动的Intent
         cBuilder.setSmallIcon(smallIcon);// 设置顶部状态栏的小图标
         cBuilder.setTicker(ticker);// 在顶部状态栏中的提示信息
-
         cBuilder.setContentTitle(title);// 设置通知中心的标题
         cBuilder.setContentText(content);// 设置通知中心中的内容
         cBuilder.setWhen(System.currentTimeMillis());

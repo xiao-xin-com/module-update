@@ -19,9 +19,73 @@ public class XXUpdateConfiguration {
     private String targetFile;
     private boolean debug;
     private boolean silence;
+    private boolean showUI;
+    private int icon;
     private XXVersionInfoProvider versionInfoProvider;
     private XXDownloadListener downloadListener;
 
+    public XXDownloadListener getDownloadListener() {
+        return downloadListener;
+    }
+
+    public XXUpdateConfiguration setDownloadListener(XXDownloadListener downloadListener) {
+        this.downloadListener = downloadListener;
+        return this;
+    }
+
+    public String getUpdateUrl() {
+        return updateUrl;
+    }
+
+    public XXUpdateConfiguration setUpdateUrl(String updateUrl) {
+        this.updateUrl = updateUrl;
+        return this;
+    }
+
+    public String getApkDownloadUrl() {
+        return apkDownloadUrl;
+    }
+
+    public XXUpdateConfiguration setApkDownloadUrl(String apkDownloadUrl) {
+        this.apkDownloadUrl = apkDownloadUrl;
+        return this;
+    }
+
+    public String getTargetFile() {
+        return targetFile;
+    }
+
+    public XXUpdateConfiguration setTargetFile(String targetFile) {
+        this.targetFile = targetFile;
+        return this;
+    }
+
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public XXUpdateConfiguration setDebug(boolean debug) {
+        this.debug = debug;
+        return this;
+    }
+
+    public boolean isSilence() {
+        return silence;
+    }
+
+    public XXUpdateConfiguration setSilence(boolean silence) {
+        this.silence = silence;
+        return this;
+    }
+
+    public boolean isShowUI() {
+        return showUI;
+    }
+
+    public XXUpdateConfiguration setShowUI(boolean showUI) {
+        this.showUI = showUI;
+        return this;
+    }
 
     public XXVersionInfoProvider getVersionInfoProvider() {
         return versionInfoProvider;
@@ -35,56 +99,13 @@ public class XXUpdateConfiguration {
         return this;
     }
 
-    public boolean isSilence() {
-        return silence;
+    public int getIcon() {
+        return icon;
     }
 
-    public XXUpdateConfiguration setSilence(boolean silence) {
-        this.silence = silence;
+    public XXUpdateConfiguration setIcon(int icon) {
+        this.icon = icon;
         return this;
-    }
-
-    private XXUpdateConfiguration() {
-    }
-
-    public String getUpdateUrl() {
-        return updateUrl;
-    }
-
-    public void setUpdateUrl(String updateUrl) {
-        this.updateUrl = updateUrl;
-    }
-
-    public String getApkDownloadUrl() {
-        return apkDownloadUrl;
-    }
-
-    public void setApkDownloadUrl(String apkDownloadUrl) {
-        this.apkDownloadUrl = apkDownloadUrl;
-    }
-
-    public String getTargetFile() {
-        return targetFile;
-    }
-
-    public void setTargetFile(String targetFile) {
-        this.targetFile = targetFile;
-    }
-
-    public boolean isDebug() {
-        return debug;
-    }
-
-    public void setDebug(boolean debug) {
-        this.debug = debug;
-    }
-
-    public XXDownloadListener getDownloadListener() {
-        return downloadListener;
-    }
-
-    public void setDownloadListener(XXDownloadListener downloadListener) {
-        this.downloadListener = downloadListener;
     }
 
     public static class Builder {
@@ -93,6 +114,8 @@ public class XXUpdateConfiguration {
         private String targetFile;
         private boolean debug;
         private boolean silence;
+        private boolean showUI;
+        private int icon;
         private XXVersionInfoProvider versionInfoProvider;
         private XXDownloadListener downloadListener;
 
@@ -133,14 +156,28 @@ public class XXUpdateConfiguration {
             return this;
         }
 
+        public Builder setShowUI(boolean showUI) {
+            this.showUI = showUI;
+            return this;
+        }
+
+        public Builder setIcon(int icon) {
+            this.icon = icon;
+            return this;
+        }
+
         public XXUpdateConfiguration build() {
             XXUpdateConfiguration configuration = new XXUpdateConfiguration();
             configuration.setDebug(debug);
             configuration.setSilence(silence);
-            if (!TextUtils.isEmpty(apkDownloadUrl))
+            configuration.setShowUI(showUI);
+            configuration.setIcon(icon == 0 ? android.R.drawable.sym_def_app_icon : icon);
+            if (!TextUtils.isEmpty(apkDownloadUrl)) {
                 configuration.setApkDownloadUrl(apkDownloadUrl);
-            if (!TextUtils.isEmpty(updateUrl))
+            }
+            if (!TextUtils.isEmpty(updateUrl)) {
                 configuration.setUpdateUrl(updateUrl);
+            }
             configuration.setTargetFile(TextUtils.isEmpty(targetFile) ? XXFileUtil.getFile(Environment.getExternalStorageDirectory(), "download.apk").getAbsolutePath() : targetFile);
             configuration.setDownloadListener(downloadListener == null ? XXDownloadListener.EMPTY : downloadListener);
             configuration.setVersionInfoProvider(versionInfoProvider);

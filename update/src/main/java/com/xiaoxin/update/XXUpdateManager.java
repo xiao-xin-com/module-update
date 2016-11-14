@@ -63,6 +63,22 @@ public class XXUpdateManager {
         }
     }
 
+    public static int getIcon() {
+        return configuration.getIcon();
+    }
+
+    public static XXUpdateConfiguration setIcon(int icon) {
+        return configuration.setIcon(icon);
+    }
+
+    public static boolean isShowUI() {
+        return configuration.isShowUI();
+    }
+
+    public static XXUpdateConfiguration setShowUI(boolean showUI) {
+        return configuration.setShowUI(showUI);
+    }
+
     public static String getUpdateUrl() {
         return configuration.getUpdateUrl();
     }
