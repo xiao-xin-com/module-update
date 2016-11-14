@@ -109,6 +109,8 @@ public class XXUpdateService extends Service {
     }
 
     private Timer timer;
+    public static final int INTERNAL_CHECK_TIME = 1000 * 60 * 60 * 3;
+    public static final int DELAY_CHECK_TIME = (int) (1000 * 60 * 60 * 0.5);
 
     private void timerCheck() {
         timer = new Timer();
@@ -122,7 +124,7 @@ public class XXUpdateService extends Service {
                     }
                 });
             }
-        }, 1000 * 60 * 60, 1000 * 60 * 60 * 6);
+        }, DELAY_CHECK_TIME, INTERNAL_CHECK_TIME);
     }
 
     private void registerUpdateReceiver() {
