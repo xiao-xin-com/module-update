@@ -11,20 +11,5 @@ public interface XXDownloadListener {
 
     void onComplete();
 
-    XXDownloadListener EMPTY = new XXDownloadListener() {
-        @Override
-        public void onStart() {
-
-        }
-
-        @Override
-        public void onProgress(long current, long total) {
-
-        }
-
-        @Override
-        public void onComplete() {
-
-        }
-    };
+    XXDownloadListener EMPTY = new XXSimpleDownloadListener();
 }
