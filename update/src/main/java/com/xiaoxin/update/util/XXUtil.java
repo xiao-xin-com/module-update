@@ -2,12 +2,15 @@ package com.xiaoxin.update.util;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.IPackageInstallObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Created by liyuanbiao on 2016/9/17.
@@ -37,5 +40,15 @@ public class XXUtil {
 
     private static void execRootCmdSilent(String s) throws IOException, InterruptedException {
         XXCmdUtil.execRootCmdSilent(s);
+    }
+
+    public static final String INSTALL_METHOD = "installPackage";
+
+    public static void installPackage(Context context, File file, IPackageInstallObserver observer)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        PackageManager packageManager = context.getPackageManager();
+        Method method = PackageManager.class.getDeclaredMethod(INSTALL_METHOD, Uri.class,
+                IPackageInstallObserver.class, int.class, String.class);
+        method.invoke(packageManager, Uri.fromFile(file), observer, 0, XXGetAppInfo.getAPKPackageName(context, file.getAbsolutePath()));
     }
 }

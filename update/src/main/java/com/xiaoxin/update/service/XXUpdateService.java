@@ -8,11 +8,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageInstallObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
@@ -40,10 +43,13 @@ import com.xiaoxin.update.util.XXUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static com.xiaoxin.update.util.XXGetAppInfo.getAPKPackageName;
 
 public class XXUpdateService extends Service {
     private static final String TAG = "XXUpdateService";
@@ -311,9 +317,7 @@ public class XXUpdateService extends Service {
             public void run() {
                 if (isNeedDownload()) return;
                 String targetFile = XXUpdateManager.getTargetFile();
-                if (XXUpdateManager.isSilence() &&
-                        (XXUpdateManager.getActivityContext() == null || XXUpdateManager.getActivityContext().get() == null) &&
-                        XXCmdUtil.isRoot()) {
+                if (XXUpdateManager.isSilence() && XXCmdUtil.isRoot()) {
                     try {
                         //选择静默安装，并且当前用户不在操作，手机成功root，选择静默升级，升级失败自动转到普通升级。其他情况也是普通升级
                         slientInstall(targetFile);
@@ -344,7 +348,7 @@ public class XXUpdateService extends Service {
             return true;
         }
         //下载的应用于本应用包名不对不升级
-        String apkPackageName = XXGetAppInfo.getAPKPackageName(context, targetFile);
+        String apkPackageName = getAPKPackageName(context, targetFile);
         if (!TextUtils.equals(apkPackageName, XXGetAppInfo.getAppPackageName(context))) {
             return true;
         }
@@ -431,6 +435,45 @@ public class XXUpdateService extends Service {
         if (updateRequest != null) return;
         //从网络上获取最新的版本信息
         checkUpdateInfo();
+    }
+
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case INSTALL_COMPLETE:
+                    XXLogUtil.d("安装完成");
+                    break;
+                case INSTALL_START:
+                    XXLogUtil.d("开始安装");
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    private final int INSTALL_START = 0;
+    private final int INSTALL_COMPLETE = 1;
+
+
+    class PackageInstallObserver extends IPackageInstallObserver.Stub {
+        public void packageInstalled(String packageName, int returnCode) {
+            Message.obtain(mHandler, INSTALL_COMPLETE, returnCode, 0).sendToTarget();
+        }
+    }
+
+    private void installPackage(File file) {
+        try {
+            PackageInstallObserver observer = new PackageInstallObserver();
+            XXUtil.installPackage(this, file, observer);
+            Message.obtain(mHandler, INSTALL_START).sendToTarget();
+        } catch (NoSuchMethodException e) {
+            XXLogUtil.e("installPackage: ", e);
+        } catch (InvocationTargetException e) {
+            XXLogUtil.e("installPackage: ", e);
+        } catch (IllegalAccessException e) {
+            XXLogUtil.e("installPackage: ", e);
+        }
     }
 
 }
