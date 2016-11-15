@@ -8,6 +8,8 @@ import com.xiaoxin.update.XXVersionInfoProvider;
 import com.xiaoxin.update.listener.XXDownloadListener;
 import com.xiaoxin.update.util.XXFileUtil;
 
+import java.io.File;
+
 /**
  * Created by liyuanbiao on 2016/9/17.
  */
@@ -33,6 +35,18 @@ public class XXUpdateConfiguration {
     private XXVersionInfoProvider versionInfoProvider;
     //下载监听
     private XXDownloadListener downloadListener;
+
+    {
+        debug = false;
+        silence = true;
+        usePm = true;
+        versionInfoProvider = new XXDefaultVersionProvider();
+        downloadListener = XXDownloadListener.EMPTY;
+        File externalStorageDirectory = Environment.getExternalStorageDirectory();
+        if (externalStorageDirectory != null && externalStorageDirectory.exists() && externalStorageDirectory.isDirectory()) {
+            targetFile = new File(externalStorageDirectory, "download.apk").getAbsolutePath();
+        }
+    }
 
     public boolean isUsePm() {
         return usePm;
