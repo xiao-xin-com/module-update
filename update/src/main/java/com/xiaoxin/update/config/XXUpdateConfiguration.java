@@ -6,7 +6,6 @@ import android.text.TextUtils;
 import com.xiaoxin.update.XXDefaultVersionProvider;
 import com.xiaoxin.update.XXVersionInfoProvider;
 import com.xiaoxin.update.listener.XXDownloadListener;
-import com.xiaoxin.update.util.XXCmdUtil;
 import com.xiaoxin.update.util.XXFileUtil;
 
 /**
@@ -14,15 +13,35 @@ import com.xiaoxin.update.util.XXFileUtil;
  */
 
 public class XXUpdateConfiguration {
+    //检测升级url
     private String updateUrl;
-    private String apkDownloadUrl;
+    //apk下载地址
+    private String downloadUrl;
+    //apk下载存放地址
     private String targetFile;
+    //是否开启debug
     private boolean debug;
+    //是否静默安装
     private boolean silence;
+    //是否再下载时显示通知栏，设置非静默安装时生效
     private boolean showUI;
+    //是否使用pm安装，设置静默安装，且使用系统签名时生效
+    private boolean usePm;
+    //下载时显示的图标的资源id
     private int icon;
+    //版本信息提供者
     private XXVersionInfoProvider versionInfoProvider;
+    //下载监听
     private XXDownloadListener downloadListener;
+
+    public boolean isUsePm() {
+        return usePm;
+    }
+
+    public XXUpdateConfiguration setUsePm(boolean usePm) {
+        this.usePm = usePm;
+        return this;
+    }
 
     public XXDownloadListener getDownloadListener() {
         return downloadListener;
@@ -42,12 +61,12 @@ public class XXUpdateConfiguration {
         return this;
     }
 
-    public String getApkDownloadUrl() {
-        return apkDownloadUrl;
+    public String getDownloadUrl() {
+        return downloadUrl;
     }
 
-    public XXUpdateConfiguration setApkDownloadUrl(String apkDownloadUrl) {
-        this.apkDownloadUrl = apkDownloadUrl;
+    public XXUpdateConfiguration setDownloadUrl(String downloadUrl) {
+        this.downloadUrl = downloadUrl;
         return this;
     }
 
@@ -110,14 +129,20 @@ public class XXUpdateConfiguration {
 
     public static class Builder {
         private String updateUrl;
-        private String apkDownloadUrl;
+        private String downloadUrl;
         private String targetFile;
         private boolean debug;
         private boolean silence;
         private boolean showUI;
+        private boolean usePm;
         private int icon;
         private XXVersionInfoProvider versionInfoProvider;
         private XXDownloadListener downloadListener;
+
+        public Builder setUsePm(boolean usePm) {
+            this.usePm = usePm;
+            return this;
+        }
 
         public Builder setVersionInfoProvider(XXVersionInfoProvider versionInfoProvider) {
             this.versionInfoProvider = versionInfoProvider;
@@ -129,8 +154,8 @@ public class XXUpdateConfiguration {
             return this;
         }
 
-        public Builder setApkDownloadUrl(String apkDownloadUrl) {
-            this.apkDownloadUrl = apkDownloadUrl;
+        public Builder setDownloadUrl(String downloadUrl) {
+            this.downloadUrl = downloadUrl;
             return this;
         }
 
@@ -150,9 +175,7 @@ public class XXUpdateConfiguration {
         }
 
         public Builder setSilence(boolean silence) {
-            if (XXCmdUtil.isRoot()) {
-                this.silence = silence;
-            }
+            this.silence = silence;
             return this;
         }
 
@@ -171,9 +194,10 @@ public class XXUpdateConfiguration {
             configuration.setDebug(debug);
             configuration.setSilence(silence);
             configuration.setShowUI(showUI);
+            configuration.setUsePm(usePm);
             configuration.setIcon(icon == 0 ? android.R.drawable.sym_def_app_icon : icon);
-            if (!TextUtils.isEmpty(apkDownloadUrl)) {
-                configuration.setApkDownloadUrl(apkDownloadUrl);
+            if (!TextUtils.isEmpty(downloadUrl)) {
+                configuration.setDownloadUrl(downloadUrl);
             }
             if (!TextUtils.isEmpty(updateUrl)) {
                 configuration.setUpdateUrl(updateUrl);

@@ -95,16 +95,8 @@ public class XXUpdateManager {
         return configuration.getDownloadListener();
     }
 
-    public static String getApkDownloadUrl() {
-        return configuration.getApkDownloadUrl();
-    }
-
     public static boolean isDebug() {
         return configuration.isDebug();
-    }
-
-    public static void setApkDownloadUrl(String apkDownloadUrl) {
-        configuration.setApkDownloadUrl(apkDownloadUrl);
     }
 
     public static void setUpdateUrl(String updateUrl) {
@@ -133,6 +125,22 @@ public class XXUpdateManager {
 
     public static XXUpdateConfiguration setVersionInfoProvider(XXVersionInfoProvider versionInfoProvider) {
         return configuration.setVersionInfoProvider(versionInfoProvider);
+    }
+
+    public static boolean isUsePm() {
+        return configuration.isUsePm();
+    }
+
+    public static String getDownloadUrl() {
+        return configuration.getDownloadUrl();
+    }
+
+    public static XXUpdateConfiguration setUsePm(boolean usePm) {
+        return configuration.setUsePm(usePm);
+    }
+
+    public static XXUpdateConfiguration setDownloadUrl(String downloadUrl) {
+        return configuration.setDownloadUrl(downloadUrl);
     }
 
     public static Context getContext() {

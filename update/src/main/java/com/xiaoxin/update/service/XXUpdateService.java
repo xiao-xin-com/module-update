@@ -215,12 +215,12 @@ public class XXUpdateService extends Service {
                 String downloadUrl = versionInfo.getDownloadUrl();
                 if (!TextUtils.isEmpty(downloadUrl)) {
                     if (downloadUrl.startsWith("http://") || downloadUrl.startsWith("https://")) {
-                        XXUpdateManager.setApkDownloadUrl(downloadUrl);
+                        XXUpdateManager.setDownloadUrl(downloadUrl);
                     } else {
                         XXLogUtil.e("这不是一个下载链接 DownloadUrl --> " + downloadUrl);
                     }
                 }
-                if (!TextUtils.isEmpty(XXUpdateManager.getApkDownloadUrl())) {
+                if (!TextUtils.isEmpty(XXUpdateManager.getDownloadUrl())) {
                     if (XXUpdateManager.isSilence()) {
                         downloadOrInstall();
                     } else {
@@ -245,7 +245,7 @@ public class XXUpdateService extends Service {
     }
 
     private void downloadApk() {
-        final String apkDownloadUrl = XXUpdateManager.getApkDownloadUrl();
+        final String apkDownloadUrl = XXUpdateManager.getDownloadUrl();
         final String targetFile = XXUpdateManager.getTargetFile();
         if (TextUtils.isEmpty(apkDownloadUrl) || TextUtils.isEmpty(targetFile)) {
             return;
@@ -317,14 +317,24 @@ public class XXUpdateService extends Service {
             public void run() {
                 if (isNeedDownload()) return;
                 String targetFile = XXUpdateManager.getTargetFile();
-                if (XXUpdateManager.isSilence() && XXCmdUtil.isRoot()) {
-                    try {
-                        //选择静默安装，并且当前用户不在操作，手机成功root，选择静默升级，升级失败自动转到普通升级。其他情况也是普通升级
-                        slientInstall(targetFile);
-                    } catch (Exception e) {
+                if (XXUpdateManager.isSilence()) {
+                    if (XXUpdateManager.isUsePm()) {
+                        //pm安装
+                        installPackage(new File(targetFile));
+                    } else if (XXCmdUtil.isRoot()) {
+                        try {
+                            //非pm安装下，有root权限adb安装
+                            slientInstall(targetFile);
+                        } catch (Exception e) {
+                            //异常则普通安装
+                            startInstall(targetFile);
+                        }
+                    } else {
+                        //无root权限普通安装
                         startInstall(targetFile);
                     }
                 } else {
+                    //普通安装
                     startInstall(targetFile);
                 }
             }
