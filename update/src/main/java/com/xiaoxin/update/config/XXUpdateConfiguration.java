@@ -36,16 +36,8 @@ public class XXUpdateConfiguration {
     //下载监听
     private XXDownloadListener downloadListener;
 
-    {
-        debug = false;
-        silence = true;
-        usePm = true;
-        versionInfoProvider = new XXDefaultVersionProvider();
-        downloadListener = XXDownloadListener.EMPTY;
-        File externalStorageDirectory = Environment.getExternalStorageDirectory();
-        if (externalStorageDirectory != null && externalStorageDirectory.exists() && externalStorageDirectory.isDirectory()) {
-            targetFile = new File(externalStorageDirectory, "download.apk").getAbsolutePath();
-        }
+    protected XXUpdateConfiguration(){
+
     }
 
     public boolean isUsePm() {
@@ -152,6 +144,18 @@ public class XXUpdateConfiguration {
         private int icon;
         private XXVersionInfoProvider versionInfoProvider;
         private XXDownloadListener downloadListener;
+
+        {
+            debug = false;
+            silence = true;
+            usePm = true;
+            versionInfoProvider = new XXDefaultVersionProvider();
+            downloadListener = XXDownloadListener.EMPTY;
+            File externalStorageDirectory = Environment.getExternalStorageDirectory();
+            if (externalStorageDirectory != null && externalStorageDirectory.exists() && externalStorageDirectory.isDirectory()) {
+                targetFile = new File(externalStorageDirectory, "download.apk").getAbsolutePath();
+            }
+        }
 
         public Builder setUsePm(boolean usePm) {
             this.usePm = usePm;

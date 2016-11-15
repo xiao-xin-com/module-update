@@ -43,12 +43,14 @@ public class XXUtil {
     }
 
     public static final String INSTALL_METHOD = "installPackage";
+    public static final int INSTALL_REPLACE_EXISTING = 0x00000002;
+    public static final int INSTALL_DONT_KILL_APP = 0x00001000;
 
     public static void installPackage(Context context, File file, IPackageInstallObserver observer)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         PackageManager packageManager = context.getPackageManager();
         Method method = PackageManager.class.getDeclaredMethod(INSTALL_METHOD, Uri.class,
                 IPackageInstallObserver.class, int.class, String.class);
-        method.invoke(packageManager, Uri.fromFile(file), observer, 0, XXGetAppInfo.getAPKPackageName(context, file.getAbsolutePath()));
+        method.invoke(packageManager, Uri.fromFile(file), observer, INSTALL_REPLACE_EXISTING | INSTALL_DONT_KILL_APP, XXGetAppInfo.getAPKPackageName(context, file.getAbsolutePath()));
     }
 }
