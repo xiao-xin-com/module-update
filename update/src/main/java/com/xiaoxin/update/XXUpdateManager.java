@@ -63,6 +63,14 @@ public class XXUpdateManager {
         }
     }
 
+    public static XXUpdateConfiguration setFriendly(boolean friendly) {
+        return configuration.setFriendly(friendly);
+    }
+
+    public static boolean isFriendly() {
+        return configuration.isFriendly();
+    }
+
     public static int getIcon() {
         return configuration.getIcon();
     }

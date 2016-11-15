@@ -36,6 +36,7 @@ public class XXApplication extends Application {
                 .setSilence(true)//是否静默升级
                 .setShowUI(true)//是否显示进度条
                 .setUsePm(true)
+                .setFriendly(true)
                 .setIcon(R.mipmap.friends)//设置显示的图标
                 .setTargetFile(new File(Environment.getExternalStorageDirectory(), "update.apk").getAbsolutePath())//apk存放地址
 //                .setVersionInfoProvider(versionInfoProvider)

@@ -29,6 +29,8 @@ public class XXUpdateConfiguration {
     private boolean showUI;
     //是否使用pm安装，设置静默安装，且使用系统签名时生效
     private boolean usePm;
+    //设置为true则表示，用户正在操作时采用普通升级
+    private boolean isFriendly;
     //下载时显示的图标的资源id
     private int icon;
     //版本信息提供者
@@ -36,8 +38,17 @@ public class XXUpdateConfiguration {
     //下载监听
     private XXDownloadListener downloadListener;
 
-    protected XXUpdateConfiguration(){
+    protected XXUpdateConfiguration() {
 
+    }
+
+    public boolean isFriendly() {
+        return isFriendly;
+    }
+
+    public XXUpdateConfiguration setFriendly(boolean friendly) {
+        isFriendly = friendly;
+        return this;
     }
 
     public boolean isUsePm() {
@@ -141,6 +152,7 @@ public class XXUpdateConfiguration {
         private boolean silence;
         private boolean showUI;
         private boolean usePm;
+        private boolean isFriendly;
         private int icon;
         private XXVersionInfoProvider versionInfoProvider;
         private XXDownloadListener downloadListener;
@@ -149,12 +161,18 @@ public class XXUpdateConfiguration {
             debug = false;
             silence = true;
             usePm = true;
+            isFriendly = false;
             versionInfoProvider = new XXDefaultVersionProvider();
             downloadListener = XXDownloadListener.EMPTY;
             File externalStorageDirectory = Environment.getExternalStorageDirectory();
             if (externalStorageDirectory != null && externalStorageDirectory.exists() && externalStorageDirectory.isDirectory()) {
                 targetFile = new File(externalStorageDirectory, "download.apk").getAbsolutePath();
             }
+        }
+
+        public Builder setFriendly(boolean friendly) {
+            isFriendly = friendly;
+            return this;
         }
 
         public Builder setUsePm(boolean usePm) {
@@ -213,6 +231,7 @@ public class XXUpdateConfiguration {
             configuration.setSilence(silence);
             configuration.setShowUI(showUI);
             configuration.setUsePm(usePm);
+            configuration.setFriendly(isFriendly);
             configuration.setIcon(icon == 0 ? android.R.drawable.sym_def_app_icon : icon);
             if (!TextUtils.isEmpty(downloadUrl)) {
                 configuration.setDownloadUrl(downloadUrl);

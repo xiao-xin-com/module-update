@@ -308,7 +308,7 @@ public class XXUpdateService extends Service {
         if (downloadListener != null) {
             downloadListener.onComplete();
         }
-        startInstallApp();
+        Message.obtain(mHandler, INSTALL_APP).sendToTarget();
     }
 
     private void startInstallApp() {
@@ -317,25 +317,22 @@ public class XXUpdateService extends Service {
             public void run() {
                 if (isNeedDownload()) return;
                 String targetFile = XXUpdateManager.getTargetFile();
-                if (XXUpdateManager.isSilence()) {
+                if ((!XXUpdateManager.isSilence()) || (XXUpdateManager.isFriendly() &&
+                        XXUpdateManager.getActivityContext() != null &&
+                        XXUpdateManager.getActivityContext().get() != null)) {
+                    startInstall(targetFile);
+                } else if (XXUpdateManager.isSilence()) {
                     if (XXUpdateManager.isUsePm()) {
-                        //pm安装
-                        installPackage(new File(targetFile));
+                        installPackage(new File(targetFile));  //pm安装
                     } else if (XXCmdUtil.isRoot()) {
                         try {
-                            //非pm安装下，有root权限adb安装
-                            slientInstall(targetFile);
+                            slientInstall(targetFile);//非pm安装下，有root权限adb安装
                         } catch (Exception e) {
-                            //异常则普通安装
-                            startInstall(targetFile);
+                            startInstall(targetFile); //异常则普通安装
                         }
                     } else {
-                        //无root权限普通安装
-                        startInstall(targetFile);
+                        startInstall(targetFile);  //无root权限普通安装
                     }
-                } else {
-                    //普通安装
-                    startInstall(targetFile);
                 }
             }
 
@@ -451,10 +448,14 @@ public class XXUpdateService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case INSTALL_COMPLETE:
-                    XXLogUtil.d("安装完成");
+                    XXLogUtil.d("PM安装完成");
                     break;
                 case INSTALL_START:
-                    XXLogUtil.d("开始安装");
+                    XXLogUtil.d("PM开始安装");
+                    break;
+                case INSTALL_APP:
+                    XXLogUtil.d("安装APP");
+                    startInstallApp();
                     break;
                 default:
                     break;
@@ -464,6 +465,7 @@ public class XXUpdateService extends Service {
 
     private final int INSTALL_START = 0;
     private final int INSTALL_COMPLETE = 1;
+    private final int INSTALL_APP = 2;
 
 
     class PackageInstallObserver extends IPackageInstallObserver.Stub {
@@ -473,6 +475,7 @@ public class XXUpdateService extends Service {
     }
 
     private void installPackage(File file) {
+        XXLogUtil.d("installPackage() called with: file = [" + file + "]");
         try {
             PackageInstallObserver observer = new PackageInstallObserver();
             XXUtil.installPackage(this, file, observer);
