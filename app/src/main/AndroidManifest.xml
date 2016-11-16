@@ -24,11 +24,6 @@
         </activity>
 
         <service
-            android:name=".service.XXUpdatingService"
-            android:enabled="true"
-            android:exported="true" />
-
-        <service
             android:name=".service.XXBootService"
             android:enabled="true"
             android:exported="true" />

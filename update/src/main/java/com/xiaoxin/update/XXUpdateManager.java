@@ -30,6 +30,8 @@ public class XXUpdateManager {
     //显示dialog的activity
     private static WeakReference<Context> activityContext;
 
+    private static boolean isInit;
+
     //把任务加到UIThread
     public static void post(Runnable runnable) {
         XXUITask.post(runnable);
@@ -45,10 +47,17 @@ public class XXUpdateManager {
         if (context == null || configuration == null) {
             throw new NullPointerException();
         }
-        FileDownloader.init(context.getApplicationContext());
-        XXUpdateManager.context = context.getApplicationContext();
-        XXUpdateManager.configuration = configuration;
-        startUpdateService();
+        if (!isInit()) {
+            XXUpdateManager.context = context.getApplicationContext();
+            XXUpdateManager.configuration = configuration;
+            FileDownloader.init(getContext());
+            isInit = true;
+            startUpdateService();
+        }
+    }
+
+    public static boolean isInit() {
+        return isInit;
     }
 
     //开启更新服务
@@ -64,6 +73,7 @@ public class XXUpdateManager {
             Intent intent = new Intent(getContext(), XXUpdateService.class);
             unBindUpdateService(getContext());
             getContext().stopService(intent);
+            isInit = false;
         }
     }
 
@@ -173,7 +183,9 @@ public class XXUpdateManager {
     private static ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            updateBinder = (XXUpdateService.UpdateBinder) service;
+            if (service instanceof XXUpdateService.UpdateBinder) {
+                updateBinder = (XXUpdateService.UpdateBinder) service;
+            }
         }
 
         @Override

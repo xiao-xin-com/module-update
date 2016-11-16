@@ -33,7 +33,7 @@ public class XXApplication extends Application {
 
         XXUpdateConfiguration configuration = new XXUpdateConfiguration.Builder()
                 .setDebug(DEBUG)//debug
-                .setSilence(true)//是否静默升级
+                .setSilence(false)//是否静默升级
                 .setShowUI(true)//是否显示进度条
                 .setUsePm(true)
                 .setFriendly(true)

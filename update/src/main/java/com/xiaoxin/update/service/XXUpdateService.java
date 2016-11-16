@@ -92,12 +92,14 @@ public class XXUpdateService extends Service {
         statusChangeObserver = XXListenerHelper.getStatusChangeObserver();
     }
 
+    private UpdateBinder updateBinder = new UpdateBinder();
+
     //有activity绑定时，如果是提示升级，而且版本信息下载完了，则去显示Dialog
     @Override
     public IBinder onBind(Intent intent) {
         XXLogUtil.d("onBind() called with: intent = [" + intent + "]");
         showUpdateDialog();
-        return new UpdateBinder();
+        return updateBinder;
     }
 
     private void showUpdateDialog() {
@@ -118,7 +120,6 @@ public class XXUpdateService extends Service {
     }
 
     public class UpdateBinder extends Binder {
-
         public int getStatus() {
             return XXUpdateService.this.getStatus();
         }
