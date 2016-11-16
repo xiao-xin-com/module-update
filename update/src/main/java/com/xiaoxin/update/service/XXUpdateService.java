@@ -203,6 +203,7 @@ public class XXUpdateService extends Service {
             @Override
             public void onResponse(String response) {
                 updateRequest = null;
+                statusChange(XXOnUpdateStatusChangeListener.STATUS_CHECK_COMPLETE);
                 onGetUpdateInfo(response);
             }
         }, new Response.ErrorListener() {
@@ -211,6 +212,7 @@ public class XXUpdateService extends Service {
                 XXLogUtil.e("网络错误...");
                 XXLogUtil.e(error);
                 updateRequest = null;
+                statusChange(XXOnUpdateStatusChangeListener.STATUS_CHECK_ERROR);
             }
         }).setRetryPolicy(new DefaultRetryPolicy() {
             @Override
@@ -218,6 +220,7 @@ public class XXUpdateService extends Service {
                 return 30000;
             }
         }));
+        statusChange(XXOnUpdateStatusChangeListener.STATUS_CHECK_START);
     }
 
     //解析服务器上的apk版本信息
@@ -315,6 +318,12 @@ public class XXUpdateService extends Service {
                         applicationIcon, "开始升级", applicationLable, "下载完成", false, false, false, 100, 100, false);
             }
         }
+
+        @Override
+        protected void error(BaseDownloadTask task, Throwable e) {
+            super.error(task, e);
+            statusChange(XXOnUpdateStatusChangeListener.STATUS_DOWNLOAD_ERROR);
+        }
     };
 
 
@@ -382,7 +391,7 @@ public class XXUpdateService extends Service {
             downloadListener.onProgress(soFarBytes, totalBytes);
         }
         downloadObserver.onProgress(soFarBytes, totalBytes);
-        statusChange(XXOnUpdateStatusChangeListener.STATUS_DOWNLOAD_PROGRESS);
+        statusChange(XXOnUpdateStatusChangeListener.STATUS_DOWNLOADING);
     }
 
     //分发下载开始事件

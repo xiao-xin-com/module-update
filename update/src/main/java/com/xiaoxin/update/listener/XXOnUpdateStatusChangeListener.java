@@ -5,12 +5,16 @@ package com.xiaoxin.update.listener;
  */
 
 public interface XXOnUpdateStatusChangeListener {
-    int STATUS_NONE = 0x11;
-    int STATUS_DOWNLOAD_START = 0x00;
-    int STATUS_DOWNLOAD_PROGRESS = 0x01;
-    int STATUS_DOWNLOAD_COMPLETE = 0x02;
-    int STATUS_INSTALL_START = 0x03;
-    int STATUS_INSTALL_COMPLETE = 0x04;
+    int STATUS_NONE = 0x00;
+    int STATUS_CHECK_START = 0x01;
+    int STATUS_CHECK_ERROR = 0x02;
+    int STATUS_CHECK_COMPLETE = 0x03;
+    int STATUS_DOWNLOAD_START = 0x04;
+    int STATUS_DOWNLOADING = 0x05;
+    int STATUS_DOWNLOAD_COMPLETE = 0x06;
+    int STATUS_DOWNLOAD_ERROR = 0x07;
+    int STATUS_INSTALL_START = 0x08;
+    int STATUS_INSTALL_COMPLETE = 0x09;
 
     void onUpdateStatusChange(int status);
 
