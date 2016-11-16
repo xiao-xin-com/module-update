@@ -21,13 +21,17 @@ import static android.content.ContentValues.TAG;
  */
 
 public class XXDefaultVersionProvider implements XXVersionInfoProvider {
-
     public static String getUpdateUrl(Context context) {
+        return getUpdateUrl(context, null);
+    }
+
+    public static String getUpdateUrl(Context context, String model) {
         try {
             return new StringBuilder("http://120.76.232.3:1337/appVersion/verify?")
-                    .append("packageName=").append(context.getPackageName()).append("&")
-                    .append("platform=Android&versionCode=")
+                    .append("packageName=").append(context.getPackageName())
+                    .append("&platform=Android&versionCode=")
                     .append(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode)
+                    .append("&model=").append(model == null ? "" : model)
                     .toString();
         } catch (PackageManager.NameNotFoundException e) {
             return null;
