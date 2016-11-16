@@ -2,9 +2,9 @@ package com.xiaoxin.bootloader;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Environment;
 
+import com.xiaoxin.update.XXDefaultVersionProvider;
 import com.xiaoxin.update.XXUpdateManager;
 import com.xiaoxin.update.config.XXUpdateConfiguration;
 
@@ -47,15 +47,7 @@ public class XXApplication extends Application {
     }
 
     public static String getUpdateUrl(Context context) {
-        try {
-            return new StringBuilder("http://120.76.232.3:1337/appVersion/verify?")
-                    .append("packageName=").append(context.getPackageName()).append("&")
-                    .append("platform=Android&versionCode=")
-                    .append(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode)
-                    .toString();
-        } catch (PackageManager.NameNotFoundException e) {
-            return null;
-        }
+        return XXDefaultVersionProvider.getUpdateUrl(context);
     }
 
     @Override

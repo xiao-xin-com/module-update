@@ -32,6 +32,11 @@ public class XXRspUpdate implements Parcelable {
     private String updatedAt;
     private String id;
     private List<String> updateInfo;
+    /**
+     * model : 0X000
+     */
+
+    private String model;
 
     public String getVersionCode() {
         return versionCode;
@@ -105,6 +110,23 @@ public class XXRspUpdate implements Parcelable {
         this.updateInfo = updateInfo;
     }
 
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public boolean isCurrent() {
+        return isCurrent;
+    }
+
+    public XXRspUpdate setCurrent(boolean current) {
+        isCurrent = current;
+        return this;
+    }
+
 
     @Override
     public int describeContents() {
@@ -122,6 +144,7 @@ public class XXRspUpdate implements Parcelable {
         dest.writeString(this.updatedAt);
         dest.writeString(this.id);
         dest.writeStringList(this.updateInfo);
+        dest.writeString(this.model);
     }
 
     public XXRspUpdate() {
@@ -137,6 +160,7 @@ public class XXRspUpdate implements Parcelable {
         this.updatedAt = in.readString();
         this.id = in.readString();
         this.updateInfo = in.createStringArrayList();
+        this.model = in.readString();
     }
 
     public static final Creator<XXRspUpdate> CREATOR = new Creator<XXRspUpdate>() {
@@ -150,19 +174,4 @@ public class XXRspUpdate implements Parcelable {
             return new XXRspUpdate[size];
         }
     };
-
-    @Override
-    public String toString() {
-        return "XXRspUpdate{" +
-                "versionCode='" + versionCode + '\'' +
-                ", packageName='" + packageName + '\'' +
-                ", updateUrl='" + updateUrl + '\'' +
-                ", platform='" + platform + '\'' +
-                ", isCurrent=" + isCurrent +
-                ", createdAt='" + createdAt + '\'' +
-                ", updatedAt='" + updatedAt + '\'' +
-                ", id='" + id + '\'' +
-                ", updateInfo=" + updateInfo +
-                '}';
-    }
 }
