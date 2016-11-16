@@ -33,6 +33,10 @@ import com.xiaoxin.update.XXUpdateManager;
 import com.xiaoxin.update.XXVersionInfoProvider;
 import com.xiaoxin.update.bean.XXVersionInfo;
 import com.xiaoxin.update.listener.XXDownloadListener;
+import com.xiaoxin.update.listener.XXDownloadObserver;
+import com.xiaoxin.update.listener.XXListenerHelper;
+import com.xiaoxin.update.listener.XXOnUpdateStatusChangeListener;
+import com.xiaoxin.update.listener.XXUpdateStatusChangeObserver;
 import com.xiaoxin.update.net.XXStringRequest;
 import com.xiaoxin.update.util.XXCmdUtil;
 import com.xiaoxin.update.util.XXGetAppInfo;
@@ -80,6 +84,14 @@ public class XXUpdateService extends Service {
     private String applicationLable;
     private int applicationIcon;
 
+    private XXDownloadObserver downloadObserver;
+    private XXUpdateStatusChangeObserver statusChangeObserver;
+
+    {
+        downloadObserver = XXListenerHelper.getDownloadObserver();
+        statusChangeObserver = XXListenerHelper.getStatusChangeObserver();
+    }
+
     //有activity绑定时，如果是提示升级，而且版本信息下载完了，则去显示Dialog
     @Override
     public IBinder onBind(Intent intent) {
@@ -105,8 +117,11 @@ public class XXUpdateService extends Service {
         return super.onUnbind(intent);
     }
 
-    public static class UpdateBinder extends Binder {
+    public class UpdateBinder extends Binder {
 
+        public int getStatus() {
+            return XXUpdateService.this.getStatus();
+        }
     }
 
     @Override
@@ -302,14 +317,6 @@ public class XXUpdateService extends Service {
         }
     };
 
-    //分发下载完成事件
-    private void dispatchDownloadComplete() {
-        final XXDownloadListener downloadListener = XXUpdateManager.getDownloadListener();
-        if (downloadListener != null) {
-            downloadListener.onComplete();
-        }
-        Message.obtain(mHandler, INSTALL_APP).sendToTarget();
-    }
 
     private void startInstallApp() {
         new Thread() {
@@ -374,6 +381,8 @@ public class XXUpdateService extends Service {
         if (downloadListener != null) {
             downloadListener.onProgress(soFarBytes, totalBytes);
         }
+        downloadObserver.onProgress(soFarBytes, totalBytes);
+        statusChange(XXOnUpdateStatusChangeListener.STATUS_DOWNLOAD_PROGRESS);
     }
 
     //分发下载开始事件
@@ -382,6 +391,30 @@ public class XXUpdateService extends Service {
         if (downloadListener != null) {
             downloadListener.onStart();
         }
+        downloadObserver.onStart();
+        statusChange(XXOnUpdateStatusChangeListener.STATUS_DOWNLOAD_START);
+    }
+
+    //分发下载完成事件
+    private void dispatchDownloadComplete() {
+        final XXDownloadListener downloadListener = XXUpdateManager.getDownloadListener();
+        if (downloadListener != null) {
+            downloadListener.onComplete();
+        }
+        downloadObserver.onComplete();
+        statusChange(XXOnUpdateStatusChangeListener.STATUS_DOWNLOAD_COMPLETE);
+        Message.obtain(mHandler, INSTALL_APP).sendToTarget();
+    }
+
+    private int status = XXOnUpdateStatusChangeListener.STATUS_NONE;
+
+    private void statusChange(int status) {
+        this.status = status;
+        statusChangeObserver.onUpdateStatusChange(status);
+    }
+
+    public int getStatus() {
+        return status;
     }
 
     @Override
@@ -449,9 +482,11 @@ public class XXUpdateService extends Service {
             switch (msg.what) {
                 case INSTALL_COMPLETE:
                     XXLogUtil.d("PM安装完成");
+                    statusChange(XXOnUpdateStatusChangeListener.STATUS_INSTALL_COMPLETE);
                     break;
                 case INSTALL_START:
                     XXLogUtil.d("PM开始安装");
+                    statusChange(XXOnUpdateStatusChangeListener.STATUS_INSTALL_START);
                     break;
                 case INSTALL_APP:
                     XXLogUtil.d("安装APP");
@@ -478,8 +513,8 @@ public class XXUpdateService extends Service {
         XXLogUtil.d("installPackage() called with: file = [" + file + "]");
         try {
             PackageInstallObserver observer = new PackageInstallObserver();
-            XXUtil.installPackage(this, file, observer);
             Message.obtain(mHandler, INSTALL_START).sendToTarget();
+            XXUtil.installPackage(this, file, observer);
         } catch (NoSuchMethodException e) {
             XXLogUtil.e("installPackage: ", e);
         } catch (InvocationTargetException e) {

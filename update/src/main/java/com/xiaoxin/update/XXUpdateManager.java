@@ -10,6 +10,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.liulishuo.filedownloader.FileDownloader;
 import com.xiaoxin.update.config.XXUpdateConfiguration;
 import com.xiaoxin.update.listener.XXDownloadListener;
+import com.xiaoxin.update.listener.XXOnUpdateStatusChangeListener;
 import com.xiaoxin.update.service.XXUpdateService;
 import com.xiaoxin.update.util.XXUITask;
 
@@ -34,6 +35,7 @@ public class XXUpdateManager {
         XXUITask.post(runnable);
     }
 
+    //把任务加到UIThread
     public static void autoPost(Runnable runnable) {
         XXUITask.autoPost(runnable);
     }
@@ -53,14 +55,23 @@ public class XXUpdateManager {
     private static void startUpdateService() {
         Intent intent = new Intent(getContext(), XXUpdateService.class);
         getContext().startService(intent);
+        bindUpdateService(getContext());
     }
 
     //销毁更新服务
     public static void unInit() {
-        if (XXUpdateManager.context != null) {
+        if (getContext() != null) {
             Intent intent = new Intent(getContext(), XXUpdateService.class);
+            unBindUpdateService(getContext());
             getContext().stopService(intent);
         }
+    }
+
+    public static int getStatus() {
+        if (updateBinder != null) {
+            return updateBinder.getStatus();
+        }
+        return XXOnUpdateStatusChangeListener.STATUS_NONE;
     }
 
     public static XXUpdateConfiguration setFriendly(boolean friendly) {
@@ -169,6 +180,7 @@ public class XXUpdateManager {
         public void onServiceDisconnected(ComponentName name) {
         }
     };
+
 
     public static void onResume(Context context) {
         if (activityContext == null || activityContext.get() == null) {
