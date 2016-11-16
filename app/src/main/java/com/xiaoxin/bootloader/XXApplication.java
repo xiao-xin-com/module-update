@@ -41,7 +41,7 @@ public class XXApplication extends Application {
                 .setTargetFile(new File(Environment.getExternalStorageDirectory(), "update.apk").getAbsolutePath())//apk存放地址
 //                .setVersionInfoProvider(versionInfoProvider)
                 .setUpdateUrl(getUpdateUrl(this))//检测升级的url
-                .setDownloadUrl("http://120.76.232.3:1337/download/update_test_1114.apk")//文件下载的url
+//                .setDownloadUrl("http://120.76.232.3:1337/download/update_test_1114.apk")//文件下载的url
                 .build();
         XXUpdateManager.init(this, configuration);
     }
