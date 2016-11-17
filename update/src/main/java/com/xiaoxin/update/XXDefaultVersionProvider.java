@@ -12,6 +12,7 @@ import com.xiaoxin.update.bean.XXRspUpdate;
 import com.xiaoxin.update.bean.XXVersionInfo;
 import com.xiaoxin.update.util.XXNumberUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
@@ -54,12 +55,24 @@ public class XXDefaultVersionProvider implements XXVersionInfoProvider {
             versionInfo.setPackageName(rspUpdate.getPackageName());
             versionInfo.setUpdateInfo(getUpdateInfo(rspUpdate.getUpdateInfo()));
             versionInfo.setDownloadUrl(rspUpdate.getUpdateUrl());
+            versionInfo.setUpdateList(filterEmpty(rspUpdate.getUpdateInfo()));
             return versionInfo;
         }
         return null;
     }
 
-    private String getUpdateInfo(List<String> updateInfo) {
+    public static List<String> filterEmpty(List<String> list) {
+        if (list == null) return new ArrayList<>();
+        List<String> stringList = new ArrayList<>();
+        for (String item : list) {
+            if (!TextUtils.isEmpty(item)) {
+                stringList.add(item);
+            }
+        }
+        return stringList;
+    }
+
+    public static String getUpdateInfo(List<String> updateInfo) {
         int number = 0;
         StringBuilder sb = null;
         if (updateInfo != null && !updateInfo.isEmpty()) {

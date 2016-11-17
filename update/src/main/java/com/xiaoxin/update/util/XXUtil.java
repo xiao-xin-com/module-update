@@ -6,6 +6,7 @@ import android.content.pm.IPackageInstallObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,14 +25,14 @@ public class XXUtil {
         return info;
     }
 
-    public static void slientInstall(String filePath) throws IOException, InterruptedException {
+    public static void silentInstall(String filePath) throws IOException, InterruptedException {
+        if (TextUtils.isEmpty(filePath) || !new File(filePath).exists()) return;
         execRootCmdSilent("pm install -r " + filePath);
     }
 
     public static void startInstall(Context context, File apkFile) {
-        if (!apkFile.exists()) {
-            return;
-        }
+        if (apkFile == null || !apkFile.exists()) return;
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setDataAndType(Uri.parse("file://" + apkFile.toString()), "application/vnd.android.package-archive");

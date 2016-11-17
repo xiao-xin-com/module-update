@@ -29,6 +29,7 @@ import com.android.volley.toolbox.Volley;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadSampleListener;
 import com.liulishuo.filedownloader.FileDownloader;
+import com.xiaoxin.update.XXDefaultVersionProvider;
 import com.xiaoxin.update.XXUpdateManager;
 import com.xiaoxin.update.XXVersionInfoProvider;
 import com.xiaoxin.update.bean.XXVersionInfo;
@@ -49,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -334,16 +336,14 @@ public class XXUpdateService extends Service {
             public void run() {
                 if (isNeedDownload()) return;
                 String targetFile = XXUpdateManager.getTargetFile();
-                if ((!XXUpdateManager.isSilence()) || (XXUpdateManager.isFriendly() &&
-                        XXUpdateManager.getActivityContext() != null &&
-                        XXUpdateManager.getActivityContext().get() != null)) {
+                if (!XXUpdateManager.isSilence()) {
                     startInstall(targetFile);
                 } else if (XXUpdateManager.isSilence()) {
                     if (XXUpdateManager.isUsePm()) {
                         installPackage(new File(targetFile));  //pm安装
                     } else if (XXCmdUtil.isRoot()) {
                         try {
-                            slientInstall(targetFile);//非pm安装下，有root权限adb安装
+                            silentInstall(targetFile);//非pm安装下，有root权限adb安装
                         } catch (Exception e) {
                             startInstall(targetFile); //异常则普通安装
                         }
@@ -353,14 +353,51 @@ public class XXUpdateService extends Service {
                 }
             }
 
-            private void slientInstall(String targetFile) throws IOException, InterruptedException {
-                XXUtil.slientInstall(targetFile);
+            private void silentInstall(String targetFile) throws IOException, InterruptedException {
+                XXUtil.silentInstall(targetFile);
             }
 
             private void startInstall(String targetFile) {
                 XXUtil.startInstall(XXUpdateService.this, new File(targetFile));
             }
         }.start();
+    }
+
+    private void ifFriendlyShowPop() {
+        if (XXUpdateManager.isFriendly() &&
+                XXUpdateManager.getActivityContext() != null &&
+                XXUpdateManager.getActivityContext().get() != null) {
+            XXUpdateManager.post(new Runnable() {
+                @Override
+                public void run() {
+                    showFriendlyPop();
+                }
+            });
+        }
+    }
+
+    private void showFriendlyPop() {
+        if (XXUpdateManager.getActivityContext() != null &&
+                XXUpdateManager.getActivityContext().get() != null) {
+            new AlertDialog.Builder(XXUpdateManager.getActivityContext().get()).setTitle("应用升级中，请稍候...")
+                    .setMessage(getFriendlyMsg()).show();
+        }
+    }
+
+    private String getFriendlyMsg() {
+        StringBuilder msgBuilder = new StringBuilder();
+        msgBuilder.append("更新如下：").append("\r\n");
+        if (versionInfo == null || versionInfo.getUpdateList() == null || versionInfo.getUpdateList().isEmpty()) {
+            msgBuilder.append("此版本暂无更新内容");
+        } else {
+            List<String> updateList = versionInfo.getUpdateList();
+            if (updateList.size() > 3) {
+                updateList = updateList.subList(0, 3);
+            }
+            String updateInfo = XXDefaultVersionProvider.getUpdateInfo(updateList);
+            msgBuilder.append(updateInfo);
+        }
+        return msgBuilder.toString();
     }
 
     //
@@ -496,6 +533,7 @@ public class XXUpdateService extends Service {
                     break;
                 case INSTALL_START:
                     XXLogUtil.d("PM开始安装");
+                    ifFriendlyShowPop();
                     statusChange(XXOnUpdateStatusChangeListener.STATUS_INSTALL_START);
                     break;
                 case INSTALL_APP:
@@ -522,9 +560,9 @@ public class XXUpdateService extends Service {
     private void installPackage(File file) {
         XXLogUtil.d("installPackage() called with: file = [" + file + "]");
         try {
-            PackageInstallObserver observer = new PackageInstallObserver();
             Message.obtain(mHandler, INSTALL_START).sendToTarget();
-            XXUtil.installPackage(this, file, observer);
+            PackageInstallObserver observer = new PackageInstallObserver();
+            XXUtil.installPackage(XXUpdateService.this, file, observer);
         } catch (NoSuchMethodException e) {
             XXLogUtil.e("installPackage: ", e);
         } catch (InvocationTargetException e) {

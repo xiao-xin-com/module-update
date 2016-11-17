@@ -3,6 +3,8 @@ package com.xiaoxin.update.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.List;
+
 /**
  * Created by liyuanbiao on 2016/9/17.
  */
@@ -12,14 +14,7 @@ public class XXVersionInfo implements Parcelable {
     private int versionCode;
     private String updateInfo;
     private String downloadUrl;
-
-
-    public XXVersionInfo(String packageName, int versionCode, String updateInfo, String downloadUrl) {
-        this.packageName = packageName;
-        this.versionCode = versionCode;
-        this.updateInfo = updateInfo;
-        this.downloadUrl = downloadUrl;
-    }
+    private List<String> updateList;
 
     public String getPackageName() {
         return packageName;
@@ -53,6 +48,14 @@ public class XXVersionInfo implements Parcelable {
         this.downloadUrl = downloadUrl;
     }
 
+    public List<String> getUpdateList() {
+        return updateList;
+    }
+
+    public void setUpdateList(List<String> updateList) {
+        this.updateList = updateList;
+    }
+
 
     @Override
     public int describeContents() {
@@ -65,6 +68,7 @@ public class XXVersionInfo implements Parcelable {
         dest.writeInt(this.versionCode);
         dest.writeString(this.updateInfo);
         dest.writeString(this.downloadUrl);
+        dest.writeStringList(this.updateList);
     }
 
     public XXVersionInfo() {
@@ -75,9 +79,10 @@ public class XXVersionInfo implements Parcelable {
         this.versionCode = in.readInt();
         this.updateInfo = in.readString();
         this.downloadUrl = in.readString();
+        this.updateList = in.createStringArrayList();
     }
 
-    public static final Parcelable.Creator<XXVersionInfo> CREATOR = new Parcelable.Creator<XXVersionInfo>() {
+    public static final Creator<XXVersionInfo> CREATOR = new Creator<XXVersionInfo>() {
         @Override
         public XXVersionInfo createFromParcel(Parcel source) {
             return new XXVersionInfo(source);
@@ -96,6 +101,15 @@ public class XXVersionInfo implements Parcelable {
                 ", versionCode=" + versionCode +
                 ", updateInfo='" + updateInfo + '\'' +
                 ", downloadUrl='" + downloadUrl + '\'' +
+                ", updateList=" + updateList +
                 '}';
+    }
+
+    public XXVersionInfo(String packageName, int versionCode, String updateInfo, String downloadUrl, List<String> updateList) {
+        this.packageName = packageName;
+        this.versionCode = versionCode;
+        this.updateInfo = updateInfo;
+        this.downloadUrl = downloadUrl;
+        this.updateList = updateList;
     }
 }
