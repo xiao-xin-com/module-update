@@ -7,6 +7,7 @@ import com.xiaoxin.update.XXDefaultVersionProvider;
 import com.xiaoxin.update.XXVersionInfoProvider;
 import com.xiaoxin.update.listener.XXDownloadListener;
 import com.xiaoxin.update.util.XXFileUtil;
+import com.xiaoxin.update.util.XXLogUtil;
 
 import java.io.File;
 
@@ -202,6 +203,7 @@ public class XXUpdateConfiguration {
 
         public Builder setDebug(boolean debug) {
             this.debug = debug;
+            XXLogUtil.setLogFlag(this.debug);
             return this;
         }
 
