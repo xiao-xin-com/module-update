@@ -1,5 +1,6 @@
 package com.xiaoxin.update.service;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -45,15 +46,14 @@ import com.xiaoxin.update.util.XXGetAppInfo;
 import com.xiaoxin.update.util.XXLogUtil;
 import com.xiaoxin.update.util.XXNetUtil;
 import com.xiaoxin.update.util.XXNotifyUtil;
-import com.xiaoxin.update.util.XXUITask;
 import com.xiaoxin.update.util.XXUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class XXUpdateService extends Service {
 
@@ -63,9 +63,14 @@ public class XXUpdateService extends Service {
 
     public static final String ACTION_CHECK_UPDATE = "com.xiaoxin.update.action.service";
     public static final int AUTO_RETRY_TIMES = 10000;
+    //是否是由闹钟启动的
+    public static final String EXTRA_IS_ALARM = "isAlarm";
 
-    public static final int INTERNAL_CHECK_TIME = 1000 * 60 * 60 * 3;
-    public static final int DELAY_CHECK_TIME = (int) (1000 * 60 * 60 * 0.5);
+//    public static final long INTERNAL_CHECK_TIME = AlarmManager.INTERVAL_HALF_DAY;
+//    public static final int DELAY_CHECK_TIME = (int) (1000 * 60 * 60 * 0.5);
+
+    //    public static final long INTERNAL_CHECK_TIME = AlarmManager.INTERVAL_FIFTEEN_MINUTES / 5;
+//    public static final int DELAY_CHECK_TIME = (int) (1000 * 60);
 
     //请求队列
     private RequestQueue queue;
@@ -89,6 +94,8 @@ public class XXUpdateService extends Service {
     private Request updateRequest;
     private String applicationLable;
     private int applicationIcon;
+
+    private boolean first = true;
 
     private XXDownloadObserver downloadObserver;
     private XXUpdateStatusChangeObserver statusChangeObserver;
@@ -119,7 +126,6 @@ public class XXUpdateService extends Service {
         }
     }
 
-
     private void showUpdateDialog() {
         if (versionInfo != null) {
             if (!XXUpdateManager.isSilence() && XXUpdateManager.getActivityContext() != null &&
@@ -135,15 +141,21 @@ public class XXUpdateService extends Service {
     public void onCreate() {
         XXLogUtil.d("onCreate() called");
         super.onCreate();
+        first = true;
         initApplicationInfo();
         //初始化Volley
         initVolley();
         registerUpdateReceiver();
-        //在服务开启的时候就去检测有没有版本要更新
-        if (XXNetUtil.isAvailable(this)) {
-            checkUpdateInfo();
+        initRepeatingCheck();
+    }
+
+    private void initRepeatingCheck() {
+        XXLogUtil.d("initRepeatingCheck() called");
+        long checkSpan = XXUpdateManager.getCheckSpan();
+        XXLogUtil.d("initRepeatingCheck: checkSpan -> " + checkSpan);
+        if (checkSpan > 0) {
+            setRepeatingCheck();
         }
-        timerCheck();
     }
 
     private void initApplicationInfo() {
@@ -159,26 +171,34 @@ public class XXUpdateService extends Service {
         XXLogUtil.d("initApplicationInfo() applicationLable -> " + applicationLable);
     }
 
-    private Timer timer;
-
-
-    private void timerCheck() {
-        timer = new Timer();
-        timer.schedule(new UpdateTask(), DELAY_CHECK_TIME, INTERNAL_CHECK_TIME);
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        XXLogUtil.d("onStartCommand() called with: intent = [" + intent + "], flags = [" + flags + "], startId = [" + startId + "]");
+        boolean isAlarm = intent != null && intent.getBooleanExtra(EXTRA_IS_ALARM, false);
+        XXLogUtil.d("onStartCommand: isAlarm -> " + isAlarm);
+        if (isAlarm || startId == 1) {
+            boolean netAvailable = XXNetUtil.isAvailable(getApplicationContext());
+            XXLogUtil.d("onStartCommand: netAvailable -> " + netAvailable);
+            if (netAvailable) {
+                check();
+            }
+        }
+        return super.onStartCommand(intent, flags, startId);
     }
 
-    private class UpdateTask extends TimerTask {
-
-        @Override
-        public void run() {
-            XXLogUtil.d("timer check() called");
-            XXUITask.post(new Runnable() {
-                @Override
-                public void run() {
-                    check();
-                }
-            });
-        }
+    private void setRepeatingCheck() {
+        XXLogUtil.d("setRepeatingCheck() called");
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(getApplicationContext(), XXUpdateService.class);
+        intent.putExtra(EXTRA_IS_ALARM, true);
+        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //取消掉之前的，防止重复
+        alarmManager.cancel(pendingIntent);
+        long intervalMillis = XXUpdateManager.getCheckSpan();
+        long triggerAtMillis = System.currentTimeMillis() + intervalMillis;
+        XXLogUtil.d("setRepeatingCheck: 下次触发时间 " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(triggerAtMillis)));
+        //api19之后不精确，但是更新间隔不需要它精确
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, intervalMillis, pendingIntent);
     }
 
     /**
@@ -524,10 +544,6 @@ public class XXUpdateService extends Service {
         return status;
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
-    }
 
     //提示升级显示对话框
     private void showDialog(Context context, String updateInfo) {
@@ -552,23 +568,26 @@ public class XXUpdateService extends Service {
     public void onDestroy() {
         XXLogUtil.d("onDestroy() called");
         super.onDestroy();
-        if (queue != null) {
-            queue.stop();
-        }
-
-        if (downloadId != -1) {
-            FileDownloader.getImpl().pause(downloadId);
-        }
-
-        if (timer != null) {
-            timer.cancel();
-        }
+        stopRequestQueue();
+        pauseDownload();
         unRegisterUpdateReceiver();
     }
 
-    private class UpdateReceiver extends BroadcastReceiver {
-        private boolean first = true;
+    private void pauseDownload() {
+        XXLogUtil.d("pauseDownload() called");
+        if (downloadId != -1) {
+            FileDownloader.getImpl().pause(downloadId);
+        }
+    }
 
+    private void stopRequestQueue() {
+        XXLogUtil.d("stopRequestQueue() called");
+        if (queue != null) {
+            queue.stop();
+        }
+    }
+
+    private class UpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -588,12 +607,13 @@ public class XXUpdateService extends Service {
     }
 
     private void check() {
+        XXLogUtil.d("check() called start");
         //如果当前正在显示对话框不去检测升级
         if (dialog != null && dialog.isShowing()) return;
         //如果升级请求没结束，不再发起第二次请求
         if (checking()) return;
         //从网络上获取最新的版本信息
-        XXLogUtil.d("check() called");
+        XXLogUtil.d("check() called ok");
         checkUpdateInfo();
     }
 
