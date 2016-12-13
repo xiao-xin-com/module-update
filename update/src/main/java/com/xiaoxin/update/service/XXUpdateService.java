@@ -11,12 +11,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 
@@ -29,6 +29,7 @@ import com.android.volley.toolbox.Volley;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadSampleListener;
 import com.liulishuo.filedownloader.FileDownloader;
+import com.liulishuo.filedownloader.model.FileDownloadStatus;
 import com.xiaoxin.update.XXDefaultVersionProvider;
 import com.xiaoxin.update.XXUpdateManager;
 import com.xiaoxin.update.XXVersionInfoProvider;
@@ -42,6 +43,7 @@ import com.xiaoxin.update.net.XXStringRequest;
 import com.xiaoxin.update.util.XXCmdUtil;
 import com.xiaoxin.update.util.XXGetAppInfo;
 import com.xiaoxin.update.util.XXLogUtil;
+import com.xiaoxin.update.util.XXNetUtil;
 import com.xiaoxin.update.util.XXNotifyUtil;
 import com.xiaoxin.update.util.XXUITask;
 import com.xiaoxin.update.util.XXUtil;
@@ -49,20 +51,22 @@ import com.xiaoxin.update.util.XXUtil;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.xiaoxin.update.util.XXGetAppInfo.getAPKPackageName;
-
 public class XXUpdateService extends Service {
-    private static final String TAG = "XXUpdateService";
+
+    private final int INSTALL_START = 0;
+    private final int INSTALL_COMPLETE = 1;
+    private final int INSTALL_APP = 2;
 
     public static final String ACTION_CHECK_UPDATE = "com.xiaoxin.update.action.service";
-
     public static final int AUTO_RETRY_TIMES = 10000;
+
+    public static final int INTERNAL_CHECK_TIME = 1000 * 60 * 60 * 3;
+    public static final int DELAY_CHECK_TIME = (int) (1000 * 60 * 60 * 0.5);
+
     //请求队列
     private RequestQueue queue;
 
@@ -79,7 +83,7 @@ public class XXUpdateService extends Service {
     private AlertDialog dialog;
 
     //标记当前下载的状态
-    private Map<Integer, Boolean> stateMap = new HashMap<>();
+//    private Map<Integer, Boolean> stateMap = new HashMap<>();
 
     //从服务器获取最新版本的请求
     private Request updateRequest;
@@ -100,19 +104,7 @@ public class XXUpdateService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         XXLogUtil.d("onBind() called with: intent = [" + intent + "]");
-        showUpdateDialog();
         return updateBinder;
-    }
-
-    private void showUpdateDialog() {
-        if (versionInfo != null) {
-            if (!XXUpdateManager.isSilence() && XXUpdateManager.getActivityContext() != null &&
-                    XXUpdateManager.getActivityContext().get() != null) {
-                if (XXGetAppInfo.getAppVersionCode(this) < versionInfo.getVersionCode()) {
-                    showDialog(XXUpdateManager.getActivityContext().get(), versionInfo.getUpdateInfo());
-                }
-            }
-        }
     }
 
     @Override
@@ -127,6 +119,18 @@ public class XXUpdateService extends Service {
         }
     }
 
+
+    private void showUpdateDialog() {
+        if (versionInfo != null) {
+            if (!XXUpdateManager.isSilence() && XXUpdateManager.getActivityContext() != null &&
+                    XXUpdateManager.getActivityContext().get() != null) {
+                if (XXGetAppInfo.getAppVersionCode(this) < versionInfo.getVersionCode()) {
+                    showDialog(XXUpdateManager.getActivityContext().get(), versionInfo.getUpdateInfo());
+                }
+            }
+        }
+    }
+
     @Override
     public void onCreate() {
         XXLogUtil.d("onCreate() called");
@@ -136,7 +140,9 @@ public class XXUpdateService extends Service {
         initVolley();
         registerUpdateReceiver();
         //在服务开启的时候就去检测有没有版本要更新
-        checkUpdateInfo();
+        if (XXNetUtil.isAvailable(this)) {
+            checkUpdateInfo();
+        }
         timerCheck();
     }
 
@@ -150,39 +156,52 @@ public class XXUpdateService extends Service {
             applicationIcon = android.R.drawable.sym_def_app_icon;
             applicationLable = getPackageName();
         }
+        XXLogUtil.d("initApplicationInfo() applicationLable -> " + applicationLable);
     }
 
     private Timer timer;
-    public static final int INTERNAL_CHECK_TIME = 1000 * 60 * 60 * 3;
-    public static final int DELAY_CHECK_TIME = (int) (1000 * 60 * 60 * 0.5);
+
 
     private void timerCheck() {
         timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                XXUITask.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        check();
-                    }
-                });
-            }
-        }, DELAY_CHECK_TIME, INTERNAL_CHECK_TIME);
+        timer.schedule(new UpdateTask(), DELAY_CHECK_TIME, INTERNAL_CHECK_TIME);
     }
 
+    private class UpdateTask extends TimerTask {
+
+        @Override
+        public void run() {
+            XXLogUtil.d("timer check() called");
+            XXUITask.post(new Runnable() {
+                @Override
+                public void run() {
+                    check();
+                }
+            });
+        }
+    }
+
+    /**
+     * 注册更新请求和网络状态改变的广播
+     */
     private void registerUpdateReceiver() {
         if (updateReceiver == null) {
+            XXLogUtil.d("registerUpdateReceiver() called");
             updateReceiver = new UpdateReceiver();
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(ACTION_CHECK_UPDATE);
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+            registerReceiver(updateReceiver, intentFilter);
         }
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ACTION_CHECK_UPDATE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(updateReceiver, intentFilter);
     }
 
+    /**
+     * 取消注册广播
+     */
     private void unRegisterUpdateReceiver() {
         if (updateReceiver != null) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(updateReceiver);
+            XXLogUtil.d("unRegisterUpdateReceiver() called");
+            unregisterReceiver(updateReceiver);
             updateReceiver = null;
         }
     }
@@ -191,6 +210,17 @@ public class XXUpdateService extends Service {
     private void initVolley() {
         XXLogUtil.d("initVolley() called");
         queue = Volley.newRequestQueue(this);
+    }
+
+    private boolean checking() {
+        return updateRequest != null;
+    }
+
+    private boolean downloading() {
+        return downloadId != -1 &&
+                !TextUtils.isEmpty(XXUpdateManager.getTargetFile()) &&
+                !FileDownloadStatus.isOver(FileDownloader.getImpl().
+                        getStatus(downloadId, XXUpdateManager.getTargetFile()));
     }
 
     //获取服务器的版本
@@ -230,29 +260,43 @@ public class XXUpdateService extends Service {
     private void onGetUpdateInfo(String response) {
         XXLogUtil.d("onGetUpdateInfo() called with: response = [" + response + "]");
         XXVersionInfoProvider versionInfoProvider = XXUpdateManager.getVersionInfoProvider();
-        if (versionInfoProvider != null) {
-            versionInfo = versionInfoProvider.provider(response);
-            if (versionInfo != null) {
-                String downloadUrl = versionInfo.getDownloadUrl();
-                if (!TextUtils.isEmpty(downloadUrl)) {
-                    if (downloadUrl.startsWith("http://") || downloadUrl.startsWith("https://")) {
-                        XXUpdateManager.setDownloadUrl(downloadUrl);
-                    } else {
-                        XXLogUtil.e("这不是一个下载链接 DownloadUrl --> " + downloadUrl);
-                    }
-                }
-                if (!TextUtils.isEmpty(XXUpdateManager.getDownloadUrl())) {
-                    if (XXUpdateManager.isSilence()) {
-                        downloadOrInstall();
-                    } else {
-                        showUpdateDialog();
-                    }
-                } else {
-                    XXLogUtil.e("下载链接为空");
-                }
+        if (versionInfoProvider == null) {
+            XXLogUtil.e("VersionInfoProvider为空,不能解析更新内容");
+            return;
+        }
+
+        versionInfo = versionInfoProvider.provider(response);
+        if (versionInfo == null) {
+            XXLogUtil.e("VersionInfo为空,不能解析更新内容");
+            return;
+        }
+
+        String downloadUrl = versionInfo.getDownloadUrl();
+        if (TextUtils.isEmpty(downloadUrl)) {
+            downloadUrl = XXUpdateManager.getDownloadUrl();
+        }
+
+        if (TextUtils.isEmpty(downloadUrl)) {
+            XXLogUtil.e("下载链接为空,不能下载安装包");
+            return;
+        }
+
+        downloadUrl = downloadUrl.trim();
+        String lowerCase = downloadUrl.toLowerCase();
+        if (!lowerCase.startsWith("http://") && !lowerCase.startsWith("https://")) {
+            XXLogUtil.e("这不是一个下载链接 DownloadUrl --> " + downloadUrl);
+            return;
+        }
+        XXUpdateManager.setDownloadUrl(downloadUrl);
+
+        if (!TextUtils.isEmpty(XXUpdateManager.getDownloadUrl())) {
+            if (XXUpdateManager.isSilence()) {
+                downloadOrInstall();
+            } else {
+                showUpdateDialog();
             }
         } else {
-            XXLogUtil.e("VersionInfoProvider为空,不能解析更新内容");
+            XXLogUtil.e("下载链接为空");
         }
     }
 
@@ -277,7 +321,7 @@ public class XXUpdateService extends Service {
         }
         if (!TextUtils.isEmpty(apkDownloadUrl) && !TextUtils.isEmpty(targetFile)) {
             //如果这是第一次下载，或者这次下载已经完成就去下载，这样做是为了下载不重复
-            if (downloadId == -1 || stateMap.get(downloadId) == null || stateMap.get(downloadId) == false) {
+            if (!downloading()) {
                 downloadId = FileDownloader.getImpl().create(apkDownloadUrl).
                         setListener(fileDownloadSampleListener).setPath(targetFile).setAutoRetryTimes(AUTO_RETRY_TIMES).start();
             }
@@ -289,7 +333,7 @@ public class XXUpdateService extends Service {
         @Override
         protected void started(BaseDownloadTask task) {
             XXLogUtil.d("started() called with: task = [" + task + "]");
-            stateMap.put(task.getId(), true);
+//            stateMap.put(task.getId(), true);
             dispatchDownloadStart();
             if (XXUpdateManager.isShowUI() && !XXUpdateManager.isSilence()) {
                 XXNotifyUtil.create(XXUpdateService.this, task.getId()).notify_progress(null,
@@ -310,7 +354,7 @@ public class XXUpdateService extends Service {
         @Override
         protected void completed(BaseDownloadTask task) {
             XXLogUtil.d("completed() called with: task = [" + task + "]");
-            stateMap.put(task.getId(), false);
+//            stateMap.put(task.getId(), false);
             dispatchDownloadComplete();
             if (XXUpdateManager.isShowUI() && !XXUpdateManager.isSilence()) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -323,9 +367,24 @@ public class XXUpdateService extends Service {
         }
 
         @Override
+        protected void warn(BaseDownloadTask task) {
+            super.warn(task);
+            XXLogUtil.d("warn() called with: task = [" + task + "]");
+            if (XXUpdateManager.isShowUI() && !XXUpdateManager.isSilence()) {
+                XXNotifyUtil.create(XXUpdateService.this, task.getId()).notify_progress(null,
+                        applicationIcon, "开始升级", applicationLable, "下载错误", false, false, false, 0, 0, false);
+            }
+        }
+
+        @Override
         protected void error(BaseDownloadTask task, Throwable e) {
             super.error(task, e);
+            XXLogUtil.d("error() called with: task = [" + task + "], e = [" + e + "]");
             statusChange(XXOnUpdateStatusChangeListener.STATUS_DOWNLOAD_ERROR);
+            if (XXUpdateManager.isShowUI() && !XXUpdateManager.isSilence()) {
+                XXNotifyUtil.create(XXUpdateService.this, task.getId()).notify_progress(null,
+                        applicationIcon, "开始升级", applicationLable, "下载错误", false, false, false, 0, 0, false);
+            }
         }
     };
 
@@ -409,8 +468,8 @@ public class XXUpdateService extends Service {
             return true;
         }
         //下载的应用于本应用包名不对不升级
-        String apkPackageName = getAPKPackageName(context, targetFile);
-        if (!TextUtils.equals(apkPackageName, XXGetAppInfo.getAppPackageName(context))) {
+        if (!TextUtils.equals(XXGetAppInfo.getAPKPackageName(context, targetFile),
+                XXGetAppInfo.getAppPackageName(context))) {
             return true;
         }
         //versionCode小于等于本地应用也不升级
@@ -419,6 +478,7 @@ public class XXUpdateService extends Service {
             new File(targetFile).delete();
             return true;
         }
+
         return false;
     }
 
@@ -507,10 +567,22 @@ public class XXUpdateService extends Service {
     }
 
     private class UpdateReceiver extends BroadcastReceiver {
+        private boolean first = true;
+
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (TextUtils.equals(intent.getAction(), XXUpdateService.ACTION_CHECK_UPDATE)) {
-                check();
+            String action = intent.getAction();
+            XXLogUtil.d("onReceive: action -> " + action);
+            if (TextUtils.equals(action, XXUpdateService.ACTION_CHECK_UPDATE)) {
+                if (XXNetUtil.isAvailable(context)) {
+                    check();
+                }
+            } else if (TextUtils.equals(action, ConnectivityManager.CONNECTIVITY_ACTION)) {
+                XXLogUtil.d("onReceive: first -> " + first);
+                if (XXNetUtil.isAvailable(context) && first) {
+                    check();
+                    first = false;
+                }
             }
         }
     }
@@ -519,8 +591,9 @@ public class XXUpdateService extends Service {
         //如果当前正在显示对话框不去检测升级
         if (dialog != null && dialog.isShowing()) return;
         //如果升级请求没结束，不再发起第二次请求
-        if (updateRequest != null) return;
+        if (checking()) return;
         //从网络上获取最新的版本信息
+        XXLogUtil.d("check() called");
         checkUpdateInfo();
     }
 
@@ -545,10 +618,6 @@ public class XXUpdateService extends Service {
             }
         }
     };
-
-    private final int INSTALL_START = 0;
-    private final int INSTALL_COMPLETE = 1;
-    private final int INSTALL_APP = 2;
 
 
     class PackageInstallObserver extends IPackageInstallObserver.Stub {

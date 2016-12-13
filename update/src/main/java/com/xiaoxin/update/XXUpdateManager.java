@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.liulishuo.filedownloader.FileDownloader;
 import com.xiaoxin.update.config.XXUpdateConfiguration;
@@ -217,7 +216,7 @@ public class XXUpdateManager {
 
 
     public static void check(Context context) {
-        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(XXUpdateService.ACTION_CHECK_UPDATE));
+        context.sendBroadcast(new Intent(XXUpdateService.ACTION_CHECK_UPDATE));
     }
 
 }
