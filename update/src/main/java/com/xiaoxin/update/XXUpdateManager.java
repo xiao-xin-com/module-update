@@ -171,6 +171,14 @@ public class XXUpdateManager {
         return configuration.setDownloadUrl(downloadUrl);
     }
 
+    public static long getCheckSpan() {
+        return configuration.getCheckSpan();
+    }
+
+    public static void setCheckSpan(long checkSpan) {
+        configuration.setCheckSpan(checkSpan);
+    }
+
     public static Context getContext() {
         return context;
     }

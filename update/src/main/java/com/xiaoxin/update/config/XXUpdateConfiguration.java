@@ -38,6 +38,8 @@ public class XXUpdateConfiguration {
     private XXVersionInfoProvider versionInfoProvider;
     //下载监听
     private XXDownloadListener downloadListener;
+    //间隔多长时间检测一次
+    private long checkSpan;
 
     protected XXUpdateConfiguration() {
 
@@ -59,6 +61,14 @@ public class XXUpdateConfiguration {
     public XXUpdateConfiguration setUsePm(boolean usePm) {
         this.usePm = usePm;
         return this;
+    }
+
+    public long getCheckSpan() {
+        return checkSpan;
+    }
+
+    public void setCheckSpan(long checkSpan) {
+        this.checkSpan = checkSpan;
     }
 
     public XXDownloadListener getDownloadListener() {
@@ -155,6 +165,7 @@ public class XXUpdateConfiguration {
         private boolean usePm;
         private boolean isFriendly;
         private int icon;
+        private long checkSpan;
         private XXVersionInfoProvider versionInfoProvider;
         private XXDownloadListener downloadListener;
 
@@ -178,6 +189,11 @@ public class XXUpdateConfiguration {
 
         public Builder setUsePm(boolean usePm) {
             this.usePm = usePm;
+            return this;
+        }
+
+        public Builder setCheckSpan(long checkSpan) {
+            this.checkSpan = checkSpan;
             return this;
         }
 
@@ -234,6 +250,7 @@ public class XXUpdateConfiguration {
             configuration.setShowUI(showUI);
             configuration.setUsePm(usePm);
             configuration.setFriendly(isFriendly);
+            configuration.setCheckSpan(checkSpan);
             configuration.setIcon(icon == 0 ? android.R.drawable.sym_def_app_icon : icon);
             if (!TextUtils.isEmpty(downloadUrl)) {
                 configuration.setDownloadUrl(downloadUrl);
