@@ -7,8 +7,6 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.xiaoxin.update.XXUpdateManager;
-
 /**
  * Created by hugeterry(http://hugeterry.cn)
  * Date: 16/7/15 15:58
@@ -46,11 +44,11 @@ public class XXGetAppInfo {
 
     public static int getAppVersionCode(Context context) {
         try {
-            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(XXUpdateManager.getContext().getPackageName(), 0);
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             if (packageInfo != null)
                 return packageInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return 0;
     }

@@ -301,6 +301,13 @@ public class XXUpdateService extends Service {
             return;
         }
 
+        int versionCode = XXGetAppInfo.getAppVersionCode(this);
+        if (versionCode >= versionInfo.getVersionCode()) {
+            XXLogUtil.d("当前版本 " + versionCode + " ，" +
+                    "服务端版本 " + versionInfo.getVersionCode());
+            return;
+        }
+
         downloadUrl = downloadUrl.trim();
         String lowerCase = downloadUrl.toLowerCase();
         if (!lowerCase.startsWith("http://") && !lowerCase.startsWith("https://")) {
@@ -613,7 +620,7 @@ public class XXUpdateService extends Service {
         //如果升级请求没结束，不再发起第二次请求
         if (checking()) return;
         //从网络上获取最新的版本信息
-        XXLogUtil.d("check() called ok");
+        XXLogUtil.d("check() called end");
         checkUpdateInfo();
     }
 
