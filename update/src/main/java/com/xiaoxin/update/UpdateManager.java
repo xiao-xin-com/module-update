@@ -1,5 +1,6 @@
 package com.xiaoxin.update;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -8,8 +9,12 @@ import android.os.IBinder;
 
 import com.liulishuo.filedownloader.FileDownloader;
 import com.xiaoxin.update.config.UpdateConfiguration;
+import com.xiaoxin.update.exception.ServiceConnectedException;
+import com.xiaoxin.update.helper.ConnectObserver;
+import com.xiaoxin.update.helper.ListenerHelper;
+import com.xiaoxin.update.listener.OnConnectListener;
 import com.xiaoxin.update.listener.OnDownloadListener;
-import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
+import com.xiaoxin.update.listener.UpdateStatus;
 import com.xiaoxin.update.service.UpdateService;
 import com.xiaoxin.update.util.UITask;
 
@@ -21,6 +26,7 @@ import java.lang.ref.WeakReference;
 
 public class UpdateManager {
     //全局的application context
+    @SuppressLint("StaticFieldLeak")
     private static Context context;
     //更新配置
     private static UpdateConfiguration configuration;
@@ -28,7 +34,7 @@ public class UpdateManager {
     private static UpdateService.UpdateBinder updateBinder;
     //显示dialog的activity
     private static WeakReference<Context> activityContext;
-
+    //是否被初始化
     private static boolean isInit;
 
     //把任务加到UIThread
@@ -36,9 +42,24 @@ public class UpdateManager {
         UITask.post(runnable);
     }
 
-    //把任务加到UIThread
+    //把任务加到UIThread，如果当前在主线程则直接执行
     public static void autoPost(Runnable runnable) {
         UITask.autoPost(runnable);
+    }
+
+    //连接状态分发
+    private static ConnectObserver connectObserver = ListenerHelper.getConnectObserver();
+
+    public static void registerOnConnectListener(OnConnectListener observer) {
+        connectObserver.registerOnConnectListener(observer);
+    }
+
+    public static void unregisterOnConnectListener(OnConnectListener observer) {
+        connectObserver.unregisterOnConnectListener(observer);
+    }
+
+    public static void unregisterAllOnConnectListener() {
+        connectObserver.unregisterAllOnConnectListener();
     }
 
     //初始化
@@ -49,8 +70,8 @@ public class UpdateManager {
         if (!isInit()) {
             UpdateManager.context = context.getApplicationContext();
             UpdateManager.configuration = configuration;
-            FileDownloader.init(getContext());
             isInit = true;
+            FileDownloader.setup(getContext());
             startUpdateService();
         }
     }
@@ -66,21 +87,49 @@ public class UpdateManager {
         bindUpdateService(getContext());
     }
 
+    //绑定更新服务
+    private static void bindUpdateService(Context context) {
+        Intent intent = new Intent(context, UpdateService.class);
+        context.bindService(intent, conn, Context.BIND_AUTO_CREATE);
+    }
+
+    //解绑更新服务
+    private static void unBindUpdateService(Context context) {
+        context.unbindService(conn);
+    }
+
     //销毁更新服务
-    public static void unInit() {
-        if (getContext() != null) {
-            Intent intent = new Intent(getContext(), UpdateService.class);
-            unBindUpdateService(getContext());
-            getContext().stopService(intent);
+    public static void release() {
+        Context context = getContext();
+        if (context != null) {
+            Intent intent = new Intent(context, UpdateService.class);
+            unBindUpdateService(context);
+            context.stopService(intent);
             isInit = false;
         }
     }
 
+    private static ServiceConnection conn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (service instanceof UpdateService.UpdateBinder) {
+                connectObserver.onConnected(null);
+                updateBinder = (UpdateService.UpdateBinder) service;
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            connectObserver.onConnected(new ServiceConnectedException(name));
+        }
+    };
+
+
     public static int getStatus() {
-        if (updateBinder != null) {
+        if (updateBinder != null && updateBinder.isBinderAlive()) {
             return updateBinder.getStatus();
         }
-        return OnUpdateStatusChangeListener.STATUS_NONE;
+        return UpdateStatus.STATUS_NONE;
     }
 
     public static UpdateConfiguration setFriendly(boolean friendly) {
@@ -187,19 +236,6 @@ public class UpdateManager {
         return activityContext;
     }
 
-    private static ServiceConnection conn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            if (service instanceof UpdateService.UpdateBinder) {
-                updateBinder = (UpdateService.UpdateBinder) service;
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        }
-    };
-
 
     public static void onResume(Context context) {
         if (activityContext == null || activityContext.get() == null) {
@@ -208,18 +244,9 @@ public class UpdateManager {
         }
     }
 
-    private static void bindUpdateService(Context context) {
-        Intent intent = new Intent(context, UpdateService.class);
-        context.bindService(intent, conn, Context.BIND_AUTO_CREATE);
-    }
-
     public static void onPause(Context context) {
         activityContext.clear();
 //        unBindUpdateService(context);
-    }
-
-    private static void unBindUpdateService(Context context) {
-        context.unbindService(conn);
     }
 
 

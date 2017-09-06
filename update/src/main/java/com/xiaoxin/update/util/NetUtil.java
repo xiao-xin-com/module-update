@@ -10,6 +10,12 @@ import android.net.NetworkInfo;
 
 public class NetUtil {
 
+    /**
+     * 检查网络是否可用
+     *
+     * @param context
+     * @return
+     */
     public static boolean isAvailable(Context context) {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -17,6 +23,12 @@ public class NetUtil {
         return networkInfo != null && networkInfo.isConnected();
     }
 
+    /**
+     * 检查当前网络是否为wifi
+     *
+     * @param context
+     * @return
+     */
     public static boolean isWifi(Context context) {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

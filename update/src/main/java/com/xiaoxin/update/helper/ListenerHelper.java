@@ -1,5 +1,6 @@
 package com.xiaoxin.update.helper;
 
+import com.xiaoxin.update.listener.OnConnectListener;
 import com.xiaoxin.update.listener.OnDownloadListener;
 import com.xiaoxin.update.listener.OnPatchListener;
 import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
@@ -12,6 +13,11 @@ public class ListenerHelper {
     private static final DownloadObserver downloadObserver = new DownloadObserver();
     private static final PatchObserver patchObserver = new PatchObserver();
     private static final UpdateStatusChangeObserver statusChangeObserver = new UpdateStatusChangeObserver();
+    private static final ConnectObserver connectObserver = new ConnectObserver();
+
+    public static ConnectObserver getConnectObserver() {
+        return connectObserver;
+    }
 
     public static DownloadObserver getDownloadObserver() {
         return downloadObserver;
@@ -61,4 +67,15 @@ public class ListenerHelper {
         patchObserver.unregisterAllPatchListener();
     }
 
+    public static void registerOnConnectListener(OnConnectListener observer) {
+        connectObserver.registerOnConnectListener(observer);
+    }
+
+    public static void unregisterOnConnectListener(OnConnectListener observer) {
+        connectObserver.unregisterOnConnectListener(observer);
+    }
+
+    public static void unregisterAllOnConnectListener() {
+        connectObserver.unregisterAllOnConnectListener();
+    }
 }

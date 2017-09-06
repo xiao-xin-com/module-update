@@ -37,9 +37,10 @@ import com.xiaoxin.update.VersionInfoProvider;
 import com.xiaoxin.update.bean.VersionInfo;
 import com.xiaoxin.update.helper.DownloadObserver;
 import com.xiaoxin.update.helper.ListenerHelper;
+import com.xiaoxin.update.helper.PatchObserver;
+import com.xiaoxin.update.helper.UpdateStatusChangeObserver;
 import com.xiaoxin.update.listener.OnDownloadListener;
 import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
-import com.xiaoxin.update.helper.UpdateStatusChangeObserver;
 import com.xiaoxin.update.net.UpdateStringRequest;
 import com.xiaoxin.update.util.CmdUtil;
 import com.xiaoxin.update.util.GetAppInfo;
@@ -99,10 +100,12 @@ public class UpdateService extends Service {
 
     private DownloadObserver downloadObserver;
     private UpdateStatusChangeObserver statusChangeObserver;
+    private PatchObserver patchObserver;
 
     {
         downloadObserver = ListenerHelper.getDownloadObserver();
         statusChangeObserver = ListenerHelper.getStatusChangeObserver();
+        patchObserver = ListenerHelper.getPatchObserver();
     }
 
     private UpdateBinder updateBinder = new UpdateBinder();

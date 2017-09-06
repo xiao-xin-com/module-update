@@ -12,6 +12,14 @@ import java.io.IOException;
 public class CmdUtil {
     private static final String TAG = "CmdUtil";
 
+    /**
+     * 执行终端命令
+     *
+     * @param cmd
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public static int execRootCmdSilent(String cmd) throws IOException, InterruptedException {
         int result = -1;
         DataOutputStream dos = null;
@@ -38,6 +46,11 @@ public class CmdUtil {
         return result;
     }
 
+    /**
+     * 检查设备是否被root
+     *
+     * @return
+     */
     public static boolean isRoot() {
         try {
             Process process = Runtime.getRuntime().exec("su");
