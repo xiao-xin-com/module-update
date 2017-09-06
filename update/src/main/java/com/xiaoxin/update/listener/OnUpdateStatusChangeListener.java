@@ -4,7 +4,7 @@ package com.xiaoxin.update.listener;
  * Created by liyuanbiao on 2016/11/16.
  */
 
-public interface XXOnUpdateStatusChangeListener {
+public interface OnUpdateStatusChangeListener {
     int STATUS_NONE = 0x00;
     int STATUS_CHECK_START = 0x01;
     int STATUS_CHECK_ERROR = 0x02;
@@ -18,7 +18,7 @@ public interface XXOnUpdateStatusChangeListener {
 
     void onUpdateStatusChange(int status);
 
-    XXOnUpdateStatusChangeListener DEFAULT = new XXOnUpdateStatusChangeListener() {
+    OnUpdateStatusChangeListener DEFAULT = new OnUpdateStatusChangeListener() {
         @Override
         public void onUpdateStatusChange(int status) {
 

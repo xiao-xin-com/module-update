@@ -16,7 +16,7 @@ import java.nio.charset.Charset;
 /**
  * Created by liyuanbiao on 2016/3/2.
  */
-public class XXFileUtil {
+public class FileUtil {
 
     private static final String TAG = "DkFileUtil";
     public static final long ONE_KB = 1024;

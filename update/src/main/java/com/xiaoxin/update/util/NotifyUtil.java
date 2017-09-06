@@ -16,10 +16,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import static android.R.attr.x;
-
 @SuppressLint("NewApi")
-public class XXNotifyUtil {
+public class NotifyUtil {
 
     private static final int FLAG = Notification.FLAG_INSISTENT;
     int requestCode = (int) SystemClock.uptimeMillis();
@@ -31,7 +29,7 @@ public class XXNotifyUtil {
     private Context mContext;
 
 
-    public XXNotifyUtil(Context context, int ID) {
+    public NotifyUtil(Context context, int ID) {
         this.NOTIFICATION_ID = ID;
         mContext = context;
         // 获取系统服务来初始化对象
@@ -40,8 +38,8 @@ public class XXNotifyUtil {
         cBuilder = new NotificationCompat.Builder(mContext);
     }
 
-    public static XXNotifyUtil create(Context context, int ID) {
-        return new XXNotifyUtil(context, ID);
+    public static NotifyUtil create(Context context, int ID) {
+        return new NotifyUtil(context, ID);
     }
 
     /**

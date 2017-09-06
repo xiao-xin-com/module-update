@@ -6,13 +6,13 @@ import android.util.Log;
  * Created by liyuanbiao on 2016/9/17.
  */
 
-public class XXLogUtil {
+public class UpdateLogUtil {
 
     private static final String TAG = "LogUtil";
     private static boolean logFlag;
 
     public static void setLogFlag(boolean logFlag) {
-        XXLogUtil.logFlag = logFlag;
+        UpdateLogUtil.logFlag = logFlag;
     }
 
     public static void w(Object msg) { // 警告信息

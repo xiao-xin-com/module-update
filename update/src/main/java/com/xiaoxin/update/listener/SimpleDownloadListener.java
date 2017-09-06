@@ -4,7 +4,7 @@ package com.xiaoxin.update.listener;
  * Created by liyuanbiao on 2016/11/15.
  */
 
-public class XXSimpleDownloadListener implements XXDownloadListener {
+public class SimpleDownloadListener implements OnDownloadListener {
     @Override
     public void onStart() {
     }

@@ -10,12 +10,12 @@ import java.io.UnsupportedEncodingException;
  * Created by liyuanbiao on 2016/9/18.
  */
 
-public class XXStringRequest extends com.android.volley.toolbox.StringRequest {
-    public XXStringRequest(int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+public class UpdateStringRequest extends com.android.volley.toolbox.StringRequest {
+    public UpdateStringRequest(int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(method, url, listener, errorListener);
     }
 
-    public XXStringRequest(String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+    public UpdateStringRequest(String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(url, listener, errorListener);
     }
 

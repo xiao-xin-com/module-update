@@ -6,7 +6,7 @@ import android.widget.TextView;
 
 import com.xiaoxin.bootloader.R;
 import com.xiaoxin.bootloader.ui.activity.base.XXBaseActivity;
-import com.xiaoxin.update.XXUpdateManager;
+import com.xiaoxin.update.UpdateManager;
 
 
 public class XXMainActivity extends XXBaseActivity {
@@ -19,7 +19,7 @@ public class XXMainActivity extends XXBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        XXUpdateManager.check(this);
+        UpdateManager.check(this);
     }
 
     private void initView() {
@@ -30,12 +30,12 @@ public class XXMainActivity extends XXBaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        XXUpdateManager.onResume(this);
+        UpdateManager.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        XXUpdateManager.onPause(this);
+        UpdateManager.onPause(this);
     }
 }

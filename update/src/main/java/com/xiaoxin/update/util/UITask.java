@@ -7,10 +7,10 @@ import android.os.Looper;
  * Created by liyuanbiao on 2016/9/18.
  */
 
-public class XXUITask {
+public class UITask {
     private static final Handler handler = new Handler(Looper.getMainLooper());
 
-    private XXUITask() {
+    private UITask() {
     }
 
     public static void post(Runnable runnable) {

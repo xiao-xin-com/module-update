@@ -5,20 +5,22 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
  * Created by hugeterry(http://hugeterry.cn)
  * Date: 16/7/15 15:58
  */
-public class XXGetAppInfo {
+public class GetAppInfoUtil {
+
     public static String getAppName(Context context) {
         String appName = "";
         try {
             PackageInfo pi = context.getPackageManager()
                     .getPackageInfo(context.getPackageName(), 0);
             appName = pi.applicationInfo.loadLabel(context.getPackageManager()).toString();
-            if (appName == null || appName.length() <= 0) {
+            if (TextUtils.isEmpty(appName)) {
                 return "";
             }
         } catch (PackageManager.NameNotFoundException e) {

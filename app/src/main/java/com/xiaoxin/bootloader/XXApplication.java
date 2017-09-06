@@ -4,9 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Environment;
 
-import com.xiaoxin.update.XXDefaultVersionProvider;
-import com.xiaoxin.update.XXUpdateManager;
-import com.xiaoxin.update.config.XXUpdateConfiguration;
+import com.xiaoxin.update.DefaultVersionProvider;
+import com.xiaoxin.update.UpdateManager;
+import com.xiaoxin.update.config.UpdateConfiguration;
 
 import java.io.File;
 
@@ -31,7 +31,7 @@ public class XXApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        XXUpdateConfiguration configuration = new XXUpdateConfiguration.Builder()
+        UpdateConfiguration configuration = new UpdateConfiguration.Builder()
                 .setDebug(DEBUG)//debug
                 .setSilence(false)//是否静默升级
                 .setShowUI(true)//是否显示进度条
@@ -43,11 +43,11 @@ public class XXApplication extends Application {
                 .setUpdateUrl(getUpdateUrl(this))//检测升级的url
 //                .setDownloadUrl("http://120.76.232.3:1337/download/update_test_1114.apk")//文件下载的url
                 .build();
-        XXUpdateManager.init(this, configuration);
+        UpdateManager.init(this, configuration);
     }
 
     public static String getUpdateUrl(Context context) {
-        return XXDefaultVersionProvider.getUpdateUrl(context);
+        return DefaultVersionProvider.getUpdateUrl(context);
     }
 
     @Override

@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
  * Created by liyuanbiao on 2016/9/17.
  */
 
-public class XXUtil {
+public class UpdateUtil {
 
     public static PackageInfo getPackageInfo(Context context, String apkPath) {
         PackageManager pm = context.getPackageManager();
@@ -40,7 +40,7 @@ public class XXUtil {
     }
 
     private static void execRootCmdSilent(String s) throws IOException, InterruptedException {
-        XXCmdUtil.execRootCmdSilent(s);
+        CmdUtil.execRootCmdSilent(s);
     }
 
     public static final String INSTALL_METHOD = "installPackage";
@@ -52,6 +52,6 @@ public class XXUtil {
         PackageManager packageManager = context.getPackageManager();
         Method method = PackageManager.class.getDeclaredMethod(INSTALL_METHOD, Uri.class,
                 IPackageInstallObserver.class, int.class, String.class);
-        method.invoke(packageManager, Uri.fromFile(file), observer, INSTALL_REPLACE_EXISTING | INSTALL_DONT_KILL_APP, XXGetAppInfo.getAPKPackageName(context, file.getAbsolutePath()));
+        method.invoke(packageManager, Uri.fromFile(file), observer, INSTALL_REPLACE_EXISTING | INSTALL_DONT_KILL_APP, GetAppInfoUtil.getAPKPackageName(context, file.getAbsolutePath()));
     }
 }

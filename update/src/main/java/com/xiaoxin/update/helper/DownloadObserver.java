@@ -1,12 +1,14 @@
-package com.xiaoxin.update.listener;
+package com.xiaoxin.update.helper;
 
 import android.database.Observable;
+
+import com.xiaoxin.update.listener.OnDownloadListener;
 
 /**
  * Created by liyuanbiao on 2016/11/16.
  */
 
-public class XXDownloadObserver extends Observable<XXDownloadListener> implements XXDownloadListener {
+public class DownloadObserver extends Observable<OnDownloadListener> implements OnDownloadListener {
     @Override
     public void onStart() {
         synchronized (mObservers) {
@@ -34,11 +36,11 @@ public class XXDownloadObserver extends Observable<XXDownloadListener> implement
         }
     }
 
-    public void registerDownloadListener(XXDownloadListener observer) {
+    public void registerDownloadListener(OnDownloadListener observer) {
         super.registerObserver(observer);
     }
 
-    public void unregisterDownloadListener(XXDownloadListener observer) {
+    public void unregisterDownloadListener(OnDownloadListener observer) {
         super.unregisterObserver(observer);
     }
 

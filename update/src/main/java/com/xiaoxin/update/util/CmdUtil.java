@@ -9,7 +9,7 @@ import java.io.IOException;
  * Created by liyuanbiao on 2016/9/17.
  */
 
-public class XXCmdUtil {
+public class CmdUtil {
     private static final String TAG = "CmdUtil";
 
     public static int execRootCmdSilent(String cmd) throws IOException, InterruptedException {

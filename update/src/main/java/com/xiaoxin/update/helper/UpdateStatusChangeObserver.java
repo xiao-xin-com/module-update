@@ -1,12 +1,14 @@
-package com.xiaoxin.update.listener;
+package com.xiaoxin.update.helper;
 
 import android.database.Observable;
+
+import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
 
 /**
  * Created by liyuanbiao on 2016/11/16.
  */
 
-public class XXUpdateStatusChangeObserver extends Observable<XXOnUpdateStatusChangeListener> implements XXOnUpdateStatusChangeListener {
+public class UpdateStatusChangeObserver extends Observable<OnUpdateStatusChangeListener> implements OnUpdateStatusChangeListener {
     @Override
     public void onUpdateStatusChange(int status) {
         synchronized (mObservers) {
@@ -16,11 +18,11 @@ public class XXUpdateStatusChangeObserver extends Observable<XXOnUpdateStatusCha
         }
     }
 
-    public void registerUpdateStatusChangeListener(XXOnUpdateStatusChangeListener observer) {
+    public void registerUpdateStatusChangeListener(OnUpdateStatusChangeListener observer) {
         super.registerObserver(observer);
     }
 
-    public void unregisterUpdateStatusChangeListener(XXOnUpdateStatusChangeListener observer) {
+    public void unregisterUpdateStatusChangeListener(OnUpdateStatusChangeListener observer) {
         super.unregisterObserver(observer);
     }
 

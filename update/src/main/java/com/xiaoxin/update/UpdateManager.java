@@ -7,11 +7,11 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import com.liulishuo.filedownloader.FileDownloader;
-import com.xiaoxin.update.config.XXUpdateConfiguration;
-import com.xiaoxin.update.listener.XXDownloadListener;
-import com.xiaoxin.update.listener.XXOnUpdateStatusChangeListener;
-import com.xiaoxin.update.service.XXUpdateService;
-import com.xiaoxin.update.util.XXUITask;
+import com.xiaoxin.update.config.UpdateConfiguration;
+import com.xiaoxin.update.listener.OnDownloadListener;
+import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
+import com.xiaoxin.update.service.UpdateService;
+import com.xiaoxin.update.util.UITask;
 
 import java.lang.ref.WeakReference;
 
@@ -19,13 +19,13 @@ import java.lang.ref.WeakReference;
  * Created by liyuanbiao on 2016/9/17.
  */
 
-public class XXUpdateManager {
+public class UpdateManager {
     //全局的application context
     private static Context context;
     //更新配置
-    private static XXUpdateConfiguration configuration;
+    private static UpdateConfiguration configuration;
     //用于更新的服务
-    private static XXUpdateService.UpdateBinder updateBinder;
+    private static UpdateService.UpdateBinder updateBinder;
     //显示dialog的activity
     private static WeakReference<Context> activityContext;
 
@@ -33,22 +33,22 @@ public class XXUpdateManager {
 
     //把任务加到UIThread
     public static void post(Runnable runnable) {
-        XXUITask.post(runnable);
+        UITask.post(runnable);
     }
 
     //把任务加到UIThread
     public static void autoPost(Runnable runnable) {
-        XXUITask.autoPost(runnable);
+        UITask.autoPost(runnable);
     }
 
     //初始化
-    public static void init(Context context, XXUpdateConfiguration configuration) {
+    public static void init(Context context, UpdateConfiguration configuration) {
         if (context == null || configuration == null) {
             throw new NullPointerException();
         }
         if (!isInit()) {
-            XXUpdateManager.context = context.getApplicationContext();
-            XXUpdateManager.configuration = configuration;
+            UpdateManager.context = context.getApplicationContext();
+            UpdateManager.configuration = configuration;
             FileDownloader.init(getContext());
             isInit = true;
             startUpdateService();
@@ -61,7 +61,7 @@ public class XXUpdateManager {
 
     //开启更新服务
     private static void startUpdateService() {
-        Intent intent = new Intent(getContext(), XXUpdateService.class);
+        Intent intent = new Intent(getContext(), UpdateService.class);
         getContext().startService(intent);
         bindUpdateService(getContext());
     }
@@ -69,7 +69,7 @@ public class XXUpdateManager {
     //销毁更新服务
     public static void unInit() {
         if (getContext() != null) {
-            Intent intent = new Intent(getContext(), XXUpdateService.class);
+            Intent intent = new Intent(getContext(), UpdateService.class);
             unBindUpdateService(getContext());
             getContext().stopService(intent);
             isInit = false;
@@ -80,10 +80,10 @@ public class XXUpdateManager {
         if (updateBinder != null) {
             return updateBinder.getStatus();
         }
-        return XXOnUpdateStatusChangeListener.STATUS_NONE;
+        return OnUpdateStatusChangeListener.STATUS_NONE;
     }
 
-    public static XXUpdateConfiguration setFriendly(boolean friendly) {
+    public static UpdateConfiguration setFriendly(boolean friendly) {
         return configuration.setFriendly(friendly);
     }
 
@@ -95,7 +95,7 @@ public class XXUpdateManager {
         return configuration.getIcon();
     }
 
-    public static XXUpdateConfiguration setIcon(int icon) {
+    public static UpdateConfiguration setIcon(int icon) {
         return configuration.setIcon(icon);
     }
 
@@ -103,7 +103,7 @@ public class XXUpdateManager {
         return configuration.isShowUI();
     }
 
-    public static XXUpdateConfiguration setShowUI(boolean showUI) {
+    public static UpdateConfiguration setShowUI(boolean showUI) {
         return configuration.setShowUI(showUI);
     }
 
@@ -119,7 +119,7 @@ public class XXUpdateManager {
         configuration.setTargetFile(targetFile);
     }
 
-    public static XXDownloadListener getDownloadListener() {
+    public static OnDownloadListener getDownloadListener() {
         return configuration.getDownloadListener();
     }
 
@@ -135,11 +135,11 @@ public class XXUpdateManager {
         configuration.setDebug(debug);
     }
 
-    public static void setDownloadListener(XXDownloadListener downloadListener) {
+    public static void setDownloadListener(OnDownloadListener downloadListener) {
         configuration.setDownloadListener(downloadListener);
     }
 
-    public static XXVersionInfoProvider getVersionInfoProvider() {
+    public static VersionInfoProvider getVersionInfoProvider() {
         return configuration.getVersionInfoProvider();
     }
 
@@ -147,11 +147,11 @@ public class XXUpdateManager {
         return configuration.isSilence();
     }
 
-    public static XXUpdateConfiguration setSilence(boolean silence) {
+    public static UpdateConfiguration setSilence(boolean silence) {
         return configuration.setSilence(silence);
     }
 
-    public static XXUpdateConfiguration setVersionInfoProvider(XXVersionInfoProvider versionInfoProvider) {
+    public static UpdateConfiguration setVersionInfoProvider(VersionInfoProvider versionInfoProvider) {
         return configuration.setVersionInfoProvider(versionInfoProvider);
     }
 
@@ -163,11 +163,11 @@ public class XXUpdateManager {
         return configuration.getDownloadUrl();
     }
 
-    public static XXUpdateConfiguration setUsePm(boolean usePm) {
+    public static UpdateConfiguration setUsePm(boolean usePm) {
         return configuration.setUsePm(usePm);
     }
 
-    public static XXUpdateConfiguration setDownloadUrl(String downloadUrl) {
+    public static UpdateConfiguration setDownloadUrl(String downloadUrl) {
         return configuration.setDownloadUrl(downloadUrl);
     }
 
@@ -190,8 +190,8 @@ public class XXUpdateManager {
     private static ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if (service instanceof XXUpdateService.UpdateBinder) {
-                updateBinder = (XXUpdateService.UpdateBinder) service;
+            if (service instanceof UpdateService.UpdateBinder) {
+                updateBinder = (UpdateService.UpdateBinder) service;
             }
         }
 
@@ -209,7 +209,7 @@ public class XXUpdateManager {
     }
 
     private static void bindUpdateService(Context context) {
-        Intent intent = new Intent(context, XXUpdateService.class);
+        Intent intent = new Intent(context, UpdateService.class);
         context.bindService(intent, conn, Context.BIND_AUTO_CREATE);
     }
 
@@ -224,7 +224,7 @@ public class XXUpdateManager {
 
 
     public static void check(Context context) {
-        context.sendBroadcast(new Intent(XXUpdateService.ACTION_CHECK_UPDATE));
+        context.sendBroadcast(new Intent(UpdateService.ACTION_CHECK_UPDATE));
     }
 
 }

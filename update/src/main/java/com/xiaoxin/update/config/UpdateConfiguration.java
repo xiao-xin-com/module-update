@@ -3,11 +3,11 @@ package com.xiaoxin.update.config;
 import android.os.Environment;
 import android.text.TextUtils;
 
-import com.xiaoxin.update.XXDefaultVersionProvider;
-import com.xiaoxin.update.XXVersionInfoProvider;
-import com.xiaoxin.update.listener.XXDownloadListener;
-import com.xiaoxin.update.util.XXFileUtil;
-import com.xiaoxin.update.util.XXLogUtil;
+import com.xiaoxin.update.DefaultVersionProvider;
+import com.xiaoxin.update.VersionInfoProvider;
+import com.xiaoxin.update.listener.OnDownloadListener;
+import com.xiaoxin.update.util.FileUtil;
+import com.xiaoxin.update.util.UpdateLogUtil;
 
 import java.io.File;
 
@@ -15,7 +15,7 @@ import java.io.File;
  * Created by liyuanbiao on 2016/9/17.
  */
 
-public class XXUpdateConfiguration {
+public class UpdateConfiguration {
     //检测升级url
     private String updateUrl;
     //apk下载地址
@@ -35,13 +35,13 @@ public class XXUpdateConfiguration {
     //下载时显示的图标的资源id
     private int icon;
     //版本信息提供者
-    private XXVersionInfoProvider versionInfoProvider;
+    private VersionInfoProvider versionInfoProvider;
     //下载监听
-    private XXDownloadListener downloadListener;
+    private OnDownloadListener downloadListener;
     //间隔多长时间检测一次
     private long checkSpan;
 
-    protected XXUpdateConfiguration() {
+    protected UpdateConfiguration() {
 
     }
 
@@ -49,7 +49,7 @@ public class XXUpdateConfiguration {
         return isFriendly;
     }
 
-    public XXUpdateConfiguration setFriendly(boolean friendly) {
+    public UpdateConfiguration setFriendly(boolean friendly) {
         isFriendly = friendly;
         return this;
     }
@@ -58,7 +58,7 @@ public class XXUpdateConfiguration {
         return usePm;
     }
 
-    public XXUpdateConfiguration setUsePm(boolean usePm) {
+    public UpdateConfiguration setUsePm(boolean usePm) {
         this.usePm = usePm;
         return this;
     }
@@ -71,11 +71,11 @@ public class XXUpdateConfiguration {
         this.checkSpan = checkSpan;
     }
 
-    public XXDownloadListener getDownloadListener() {
+    public OnDownloadListener getDownloadListener() {
         return downloadListener;
     }
 
-    public XXUpdateConfiguration setDownloadListener(XXDownloadListener downloadListener) {
+    public UpdateConfiguration setDownloadListener(OnDownloadListener downloadListener) {
         this.downloadListener = downloadListener;
         return this;
     }
@@ -84,7 +84,7 @@ public class XXUpdateConfiguration {
         return updateUrl;
     }
 
-    public XXUpdateConfiguration setUpdateUrl(String updateUrl) {
+    public UpdateConfiguration setUpdateUrl(String updateUrl) {
         this.updateUrl = updateUrl;
         return this;
     }
@@ -93,7 +93,7 @@ public class XXUpdateConfiguration {
         return downloadUrl;
     }
 
-    public XXUpdateConfiguration setDownloadUrl(String downloadUrl) {
+    public UpdateConfiguration setDownloadUrl(String downloadUrl) {
         this.downloadUrl = downloadUrl;
         return this;
     }
@@ -102,7 +102,7 @@ public class XXUpdateConfiguration {
         return targetFile;
     }
 
-    public XXUpdateConfiguration setTargetFile(String targetFile) {
+    public UpdateConfiguration setTargetFile(String targetFile) {
         this.targetFile = targetFile;
         return this;
     }
@@ -111,7 +111,7 @@ public class XXUpdateConfiguration {
         return debug;
     }
 
-    public XXUpdateConfiguration setDebug(boolean debug) {
+    public UpdateConfiguration setDebug(boolean debug) {
         this.debug = debug;
         return this;
     }
@@ -120,7 +120,7 @@ public class XXUpdateConfiguration {
         return silence;
     }
 
-    public XXUpdateConfiguration setSilence(boolean silence) {
+    public UpdateConfiguration setSilence(boolean silence) {
         this.silence = silence;
         return this;
     }
@@ -129,19 +129,19 @@ public class XXUpdateConfiguration {
         return showUI;
     }
 
-    public XXUpdateConfiguration setShowUI(boolean showUI) {
+    public UpdateConfiguration setShowUI(boolean showUI) {
         this.showUI = showUI;
         return this;
     }
 
-    public XXVersionInfoProvider getVersionInfoProvider() {
+    public VersionInfoProvider getVersionInfoProvider() {
         return versionInfoProvider;
     }
 
-    public XXUpdateConfiguration setVersionInfoProvider(XXVersionInfoProvider versionInfoProvider) {
+    public UpdateConfiguration setVersionInfoProvider(VersionInfoProvider versionInfoProvider) {
         this.versionInfoProvider = versionInfoProvider;
         if (this.versionInfoProvider == null) {
-            this.versionInfoProvider = new XXDefaultVersionProvider();
+            this.versionInfoProvider = new DefaultVersionProvider();
         }
         return this;
     }
@@ -150,7 +150,7 @@ public class XXUpdateConfiguration {
         return icon;
     }
 
-    public XXUpdateConfiguration setIcon(int icon) {
+    public UpdateConfiguration setIcon(int icon) {
         this.icon = icon;
         return this;
     }
@@ -166,16 +166,16 @@ public class XXUpdateConfiguration {
         private boolean isFriendly;
         private int icon;
         private long checkSpan;
-        private XXVersionInfoProvider versionInfoProvider;
-        private XXDownloadListener downloadListener;
+        private VersionInfoProvider versionInfoProvider;
+        private OnDownloadListener downloadListener;
 
         {
             debug = false;
             silence = true;
             usePm = true;
             isFriendly = false;
-            versionInfoProvider = new XXDefaultVersionProvider();
-            downloadListener = XXDownloadListener.EMPTY;
+            versionInfoProvider = new DefaultVersionProvider();
+            downloadListener = OnDownloadListener.EMPTY;
             File externalStorageDirectory = Environment.getExternalStorageDirectory();
             if (externalStorageDirectory != null && externalStorageDirectory.exists() && externalStorageDirectory.isDirectory()) {
                 targetFile = new File(externalStorageDirectory, "download.apk").getAbsolutePath();
@@ -197,7 +197,7 @@ public class XXUpdateConfiguration {
             return this;
         }
 
-        public Builder setVersionInfoProvider(XXVersionInfoProvider versionInfoProvider) {
+        public Builder setVersionInfoProvider(VersionInfoProvider versionInfoProvider) {
             this.versionInfoProvider = versionInfoProvider;
             return this;
         }
@@ -219,11 +219,11 @@ public class XXUpdateConfiguration {
 
         public Builder setDebug(boolean debug) {
             this.debug = debug;
-            XXLogUtil.setLogFlag(this.debug);
+            UpdateLogUtil.setLogFlag(this.debug);
             return this;
         }
 
-        public Builder setDownloadListener(XXDownloadListener downloadListener) {
+        public Builder setDownloadListener(OnDownloadListener downloadListener) {
             this.downloadListener = downloadListener;
             return this;
         }
@@ -243,8 +243,8 @@ public class XXUpdateConfiguration {
             return this;
         }
 
-        public XXUpdateConfiguration build() {
-            XXUpdateConfiguration configuration = new XXUpdateConfiguration();
+        public UpdateConfiguration build() {
+            UpdateConfiguration configuration = new UpdateConfiguration();
             configuration.setDebug(debug);
             configuration.setSilence(silence);
             configuration.setShowUI(showUI);
@@ -258,8 +258,8 @@ public class XXUpdateConfiguration {
             if (!TextUtils.isEmpty(updateUrl)) {
                 configuration.setUpdateUrl(updateUrl);
             }
-            configuration.setTargetFile(TextUtils.isEmpty(targetFile) ? XXFileUtil.getFile(Environment.getExternalStorageDirectory(), "download.apk").getAbsolutePath() : targetFile);
-            configuration.setDownloadListener(downloadListener == null ? XXDownloadListener.EMPTY : downloadListener);
+            configuration.setTargetFile(TextUtils.isEmpty(targetFile) ? FileUtil.getFile(Environment.getExternalStorageDirectory(), "download.apk").getAbsolutePath() : targetFile);
+            configuration.setDownloadListener(downloadListener == null ? OnDownloadListener.EMPTY : downloadListener);
             configuration.setVersionInfoProvider(versionInfoProvider);
             return configuration;
         }

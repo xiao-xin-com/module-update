@@ -3,7 +3,7 @@ package com.xiaoxin.update.util;
 /**
  * Created by liyuanbiao on 2016/9/24.
  */
-public class XXNumberUtil {
+public class NumberUtil {
 
     public static int parseInt(String intStr, int defaultValue) {
         try {
