@@ -443,11 +443,11 @@ public class UpdateService extends Service {
             }
 
             private void silentInstall(String targetFile) throws IOException, InterruptedException {
-                UpdateUtil.silentInstall(targetFile);
+                UpdateUtil.startRootInstall(targetFile);
             }
 
             private void startInstall(String targetFile) {
-                UpdateUtil.startInstall(UpdateService.this, new File(targetFile));
+                UpdateUtil.startSystemInstall(UpdateService.this, new File(targetFile));
             }
         }.start();
     }
@@ -661,7 +661,7 @@ public class UpdateService extends Service {
         try {
             Message.obtain(mHandler, INSTALL_START).sendToTarget();
             PackageInstallObserver observer = new PackageInstallObserver();
-            UpdateUtil.installPackage(UpdateService.this, file, observer);
+            UpdateUtil.startPmInstall(UpdateService.this, file, observer);
         } catch (NoSuchMethodException e) {
             UpdateLog.e("installPackage: NoSuchMethodException", e);
         } catch (InvocationTargetException e) {

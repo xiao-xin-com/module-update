@@ -3,6 +3,7 @@ package com.xiaoxin.update.helper;
 import android.database.Observable;
 
 import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
+import com.xiaoxin.update.util.UITask;
 
 /**
  * Created by liyuanbiao on 2016/11/16.
@@ -10,12 +11,17 @@ import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
 
 public class UpdateStatusChangeObserver extends Observable<OnUpdateStatusChangeListener> implements OnUpdateStatusChangeListener {
     @Override
-    public void onUpdateStatusChange(int status) {
-        synchronized (mObservers) {
-            for (int i = mObservers.size() - 1; i >= 0; i--) {
-                mObservers.get(i).onUpdateStatusChange(status);
+    public void onUpdateStatusChange(final int status) {
+        UITask.post(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mObservers) {
+                    for (int i = mObservers.size() - 1; i >= 0; i--) {
+                        mObservers.get(i).onUpdateStatusChange(status);
+                    }
+                }
             }
-        }
+        });
     }
 
     public void registerUpdateStatusChangeListener(OnUpdateStatusChangeListener observer) {

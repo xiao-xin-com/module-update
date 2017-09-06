@@ -39,7 +39,7 @@ public class UpdateUtil {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void silentInstall(String filePath) throws IOException, InterruptedException {
+    public static void startRootInstall(String filePath) throws IOException, InterruptedException {
         if (TextUtils.isEmpty(filePath) || !new File(filePath).exists()) return;
         execRootCmdSilent("pm install -r " + filePath);
     }
@@ -50,7 +50,7 @@ public class UpdateUtil {
      * @param context
      * @param apkFile
      */
-    public static void startInstall(Context context, File apkFile) {
+    public static void startSystemInstall(Context context, File apkFile) {
         if (apkFile == null || !apkFile.exists()) return;
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -93,7 +93,7 @@ public class UpdateUtil {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    public static void installPackage(Context context, File file, IPackageInstallObserver observer)
+    public static void startPmInstall(Context context, File file, IPackageInstallObserver observer)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         PackageManager packageManager = context.getPackageManager();
         Method method = PackageManager.class.getDeclaredMethod(INSTALL_METHOD, Uri.class,
