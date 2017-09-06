@@ -1,6 +1,7 @@
 package com.xiaoxin.update.helper;
 
 import com.xiaoxin.update.listener.OnDownloadListener;
+import com.xiaoxin.update.listener.OnPatchListener;
 import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
 
 /**
@@ -9,6 +10,7 @@ import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
 
 public class ListenerHelper {
     private static final DownloadObserver downloadObserver = new DownloadObserver();
+    private static final PatchObserver patchObserver = new PatchObserver();
     private static final UpdateStatusChangeObserver statusChangeObserver = new UpdateStatusChangeObserver();
 
     public static DownloadObserver getDownloadObserver() {
@@ -17,6 +19,10 @@ public class ListenerHelper {
 
     public static UpdateStatusChangeObserver getStatusChangeObserver() {
         return statusChangeObserver;
+    }
+
+    public static PatchObserver getPatchObserver() {
+        return patchObserver;
     }
 
     public static void registerDownloadListener(OnDownloadListener observer) {
@@ -42,4 +48,17 @@ public class ListenerHelper {
     public static void unregisterAllUpdateStatusChangeListener() {
         statusChangeObserver.unregisterAllUpdateStatusChangeListener();
     }
+
+    public static void registerPatchListener(OnPatchListener observer) {
+        patchObserver.registerPatchListener(observer);
+    }
+
+    public static void unregisterPatchListener(OnPatchListener observer) {
+        patchObserver.unregisterPatchListener(observer);
+    }
+
+    public static void unregisterAllPatchListener() {
+        patchObserver.unregisterAllPatchListener();
+    }
+
 }

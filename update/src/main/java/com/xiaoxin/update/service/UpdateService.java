@@ -42,10 +42,10 @@ import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
 import com.xiaoxin.update.helper.UpdateStatusChangeObserver;
 import com.xiaoxin.update.net.UpdateStringRequest;
 import com.xiaoxin.update.util.CmdUtil;
-import com.xiaoxin.update.util.GetAppInfoUtil;
+import com.xiaoxin.update.util.GetAppInfo;
 import com.xiaoxin.update.util.NetUtil;
 import com.xiaoxin.update.util.NotifyUtil;
-import com.xiaoxin.update.util.UpdateLogUtil;
+import com.xiaoxin.update.util.UpdateLog;
 import com.xiaoxin.update.util.UpdateUtil;
 
 import java.io.File;
@@ -110,13 +110,13 @@ public class UpdateService extends Service {
     //有activity绑定时，如果是提示升级，而且版本信息下载完了，则去显示Dialog
     @Override
     public IBinder onBind(Intent intent) {
-        UpdateLogUtil.d("onBind() called with: intent = [" + intent + "]");
+        UpdateLog.d("onBind() called with: intent = [" + intent + "]");
         return updateBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        UpdateLogUtil.d("onUnbind() called with: intent = [" + intent + "]");
+        UpdateLog.d("onUnbind() called with: intent = [" + intent + "]");
         return super.onUnbind(intent);
     }
 
@@ -130,7 +130,7 @@ public class UpdateService extends Service {
         if (versionInfo != null) {
             if (!UpdateManager.isSilence() && UpdateManager.getActivityContext() != null &&
                     UpdateManager.getActivityContext().get() != null) {
-                if (GetAppInfoUtil.getAppVersionCode(this) < versionInfo.getVersionCode()) {
+                if (GetAppInfo.getAppVersionCode(this) < versionInfo.getVersionCode()) {
                     showDialog(UpdateManager.getActivityContext().get(), versionInfo.getDetail());
                 }
             }
@@ -139,7 +139,7 @@ public class UpdateService extends Service {
 
     @Override
     public void onCreate() {
-        UpdateLogUtil.d("onCreate() called");
+        UpdateLog.d("onCreate() called");
         super.onCreate();
         first = true;
         initApplicationInfo();
@@ -150,9 +150,9 @@ public class UpdateService extends Service {
     }
 
     private void initRepeatingCheck() {
-        UpdateLogUtil.d("initRepeatingCheck() called");
+        UpdateLog.d("initRepeatingCheck() called");
         long checkSpan = UpdateManager.getCheckSpan();
-        UpdateLogUtil.d("initRepeatingCheck: checkSpan -> " + checkSpan);
+        UpdateLog.d("initRepeatingCheck: checkSpan -> " + checkSpan);
         if (checkSpan > 0) {
             setRepeatingCheck();
         }
@@ -168,17 +168,17 @@ public class UpdateService extends Service {
             applicationIcon = android.R.drawable.sym_def_app_icon;
             applicationLable = getPackageName();
         }
-        UpdateLogUtil.d("initApplicationInfo() applicationLable -> " + applicationLable);
+        UpdateLog.d("initApplicationInfo() applicationLable -> " + applicationLable);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        UpdateLogUtil.d("onStartCommand() called with: intent = [" + intent + "], flags = [" + flags + "], startId = [" + startId + "]");
+        UpdateLog.d("onStartCommand() called with: intent = [" + intent + "], flags = [" + flags + "], startId = [" + startId + "]");
         boolean isAlarm = intent != null && intent.getBooleanExtra(EXTRA_IS_ALARM, false);
-        UpdateLogUtil.d("onStartCommand: isAlarm -> " + isAlarm);
+        UpdateLog.d("onStartCommand: isAlarm -> " + isAlarm);
         if (isAlarm || startId == 1) {
             boolean netAvailable = NetUtil.isAvailable(getApplicationContext());
-            UpdateLogUtil.d("onStartCommand: netAvailable -> " + netAvailable);
+            UpdateLog.d("onStartCommand: netAvailable -> " + netAvailable);
             if (netAvailable) {
                 check();
             }
@@ -187,7 +187,7 @@ public class UpdateService extends Service {
     }
 
     private void setRepeatingCheck() {
-        UpdateLogUtil.d("setRepeatingCheck() called");
+        UpdateLog.d("setRepeatingCheck() called");
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(getApplicationContext(), UpdateService.class);
         intent.putExtra(EXTRA_IS_ALARM, true);
@@ -196,7 +196,7 @@ public class UpdateService extends Service {
         alarmManager.cancel(pendingIntent);
         long intervalMillis = UpdateManager.getCheckSpan();
         long triggerAtMillis = System.currentTimeMillis() + intervalMillis;
-        UpdateLogUtil.d("setRepeatingCheck: 下次触发时间 " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(triggerAtMillis)));
+        UpdateLog.d("setRepeatingCheck: 下次触发时间 " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(triggerAtMillis)));
         //api19之后不精确，但是更新间隔不需要它精确
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, intervalMillis, pendingIntent);
     }
@@ -206,7 +206,7 @@ public class UpdateService extends Service {
      */
     private void registerUpdateReceiver() {
         if (updateReceiver == null) {
-            UpdateLogUtil.d("registerUpdateReceiver() called");
+            UpdateLog.d("registerUpdateReceiver() called");
             updateReceiver = new UpdateReceiver();
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(ACTION_CHECK_UPDATE);
@@ -220,7 +220,7 @@ public class UpdateService extends Service {
      */
     private void unRegisterUpdateReceiver() {
         if (updateReceiver != null) {
-            UpdateLogUtil.d("unRegisterUpdateReceiver() called");
+            UpdateLog.d("unRegisterUpdateReceiver() called");
             unregisterReceiver(updateReceiver);
             updateReceiver = null;
         }
@@ -228,7 +228,7 @@ public class UpdateService extends Service {
 
     //初始化Volley
     private void initVolley() {
-        UpdateLogUtil.d("initVolley() called");
+        UpdateLog.d("initVolley() called");
         queue = Volley.newRequestQueue(this);
     }
 
@@ -245,10 +245,10 @@ public class UpdateService extends Service {
 
     //获取服务器的版本
     private void checkUpdateInfo() {
-        UpdateLogUtil.d("checkUpdateInfo() called");
+        UpdateLog.d("checkUpdateInfo() called");
         String updateUrl = UpdateManager.getUpdateUrl();
         if (TextUtils.isEmpty(updateUrl)) {
-            UpdateLogUtil.e("更新链接为空");
+            UpdateLog.e("更新链接为空");
             return;
         }
 
@@ -262,8 +262,8 @@ public class UpdateService extends Service {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                UpdateLogUtil.e("网络错误...");
-                UpdateLogUtil.e(error);
+                UpdateLog.e("网络错误...");
+                UpdateLog.e(error);
                 updateRequest = null;
                 statusChange(OnUpdateStatusChangeListener.STATUS_CHECK_ERROR);
             }
@@ -278,16 +278,16 @@ public class UpdateService extends Service {
 
     //解析服务器上的apk版本信息
     private void onGetUpdateInfo(String response) {
-        UpdateLogUtil.d("onGetUpdateInfo() called with: response = [" + response + "]");
+        UpdateLog.d("onGetUpdateInfo() called with: response = [" + response + "]");
         VersionInfoProvider versionInfoProvider = UpdateManager.getVersionInfoProvider();
         if (versionInfoProvider == null) {
-            UpdateLogUtil.e("VersionInfoProvider为空,不能解析更新内容");
+            UpdateLog.e("VersionInfoProvider为空,不能解析更新内容");
             return;
         }
 
         versionInfo = versionInfoProvider.provider(response);
         if (versionInfo == null) {
-            UpdateLogUtil.e("VersionInfo为空,不能解析更新内容");
+            UpdateLog.e("VersionInfo为空,不能解析更新内容");
             return;
         }
 
@@ -297,13 +297,13 @@ public class UpdateService extends Service {
         }
 
         if (TextUtils.isEmpty(downloadUrl)) {
-            UpdateLogUtil.e("下载链接为空,不能下载安装包");
+            UpdateLog.e("下载链接为空,不能下载安装包");
             return;
         }
 
-        int versionCode = GetAppInfoUtil.getAppVersionCode(this);
+        int versionCode = GetAppInfo.getAppVersionCode(this);
         if (versionCode >= versionInfo.getVersionCode()) {
-            UpdateLogUtil.d("当前版本 " + versionCode + " ，" +
+            UpdateLog.d("当前版本 " + versionCode + " ，" +
                     "服务端版本 " + versionInfo.getVersionCode());
             return;
         }
@@ -311,7 +311,7 @@ public class UpdateService extends Service {
         downloadUrl = downloadUrl.trim();
         String lowerCase = downloadUrl.toLowerCase();
         if (!lowerCase.startsWith("http://") && !lowerCase.startsWith("https://")) {
-            UpdateLogUtil.e("这不是一个下载链接 DownloadUrl --> " + downloadUrl);
+            UpdateLog.e("这不是一个下载链接 DownloadUrl --> " + downloadUrl);
             return;
         }
         UpdateManager.setDownloadUrl(downloadUrl);
@@ -323,12 +323,12 @@ public class UpdateService extends Service {
                 showUpdateDialog();
             }
         } else {
-            UpdateLogUtil.e("下载链接为空");
+            UpdateLog.e("下载链接为空");
         }
     }
 
     private void downloadOrInstall() {
-        UpdateLogUtil.d("downloadOrInstall() called");
+        UpdateLog.d("downloadOrInstall() called");
         if (isNeedDownload()) {
             downloadApk();
         } else {
@@ -359,7 +359,7 @@ public class UpdateService extends Service {
     private FileDownloadSampleListener fileDownloadSampleListener = new FileDownloadSampleListener() {
         @Override
         protected void started(BaseDownloadTask task) {
-            UpdateLogUtil.d("started() called with: task = [" + task + "]");
+            UpdateLog.d("started() called with: task = [" + task + "]");
 //            stateMap.put(task.getId(), true);
             dispatchDownloadStart();
             if (UpdateManager.isShowUI() && !UpdateManager.isSilence()) {
@@ -370,7 +370,7 @@ public class UpdateService extends Service {
 
         @Override
         protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) {
-            UpdateLogUtil.d("progress() called with: task = [" + task + "], soFarBytes = [" + soFarBytes + "], totalBytes = [" + totalBytes + "]");
+            UpdateLog.d("progress() called with: task = [" + task + "], soFarBytes = [" + soFarBytes + "], totalBytes = [" + totalBytes + "]");
             dispatchDownloadProgress(soFarBytes, totalBytes);
             if (UpdateManager.isShowUI() && !UpdateManager.isSilence()) {
                 NotifyUtil.create(UpdateService.this, task.getId()).notify_progress(null,
@@ -380,7 +380,7 @@ public class UpdateService extends Service {
 
         @Override
         protected void completed(BaseDownloadTask task) {
-            UpdateLogUtil.d("completed() called with: task = [" + task + "]");
+            UpdateLog.d("completed() called with: task = [" + task + "]");
 //            stateMap.put(task.getId(), false);
             dispatchDownloadComplete();
             if (UpdateManager.isShowUI() && !UpdateManager.isSilence()) {
@@ -396,7 +396,7 @@ public class UpdateService extends Service {
         @Override
         protected void warn(BaseDownloadTask task) {
             super.warn(task);
-            UpdateLogUtil.d("warn() called with: task = [" + task + "]");
+            UpdateLog.d("warn() called with: task = [" + task + "]");
             if (UpdateManager.isShowUI() && !UpdateManager.isSilence()) {
                 NotifyUtil.create(UpdateService.this, task.getId()).notify_progress(null,
                         applicationIcon, "开始升级", applicationLable, "下载错误", false, false, false, 0, 0, false);
@@ -406,7 +406,7 @@ public class UpdateService extends Service {
         @Override
         protected void error(BaseDownloadTask task, Throwable e) {
             super.error(task, e);
-            UpdateLogUtil.d("error() called with: task = [" + task + "], e = [" + e + "]");
+            UpdateLog.d("error() called with: task = [" + task + "], e = [" + e + "]");
             statusChange(OnUpdateStatusChangeListener.STATUS_DOWNLOAD_ERROR);
             if (UpdateManager.isShowUI() && !UpdateManager.isSilence()) {
                 NotifyUtil.create(UpdateService.this, task.getId()).notify_progress(null,
@@ -495,13 +495,13 @@ public class UpdateService extends Service {
             return true;
         }
         //下载的应用于本应用包名不对不升级
-        if (!TextUtils.equals(GetAppInfoUtil.getAPKPackageName(context, targetFile),
-                GetAppInfoUtil.getAppPackageName(context))) {
+        if (!TextUtils.equals(GetAppInfo.getAPKPackageName(context, targetFile),
+                GetAppInfo.getAppPackageName(context))) {
             return true;
         }
         //versionCode小于等于本地应用也不升级
         PackageInfo packageInfo = UpdateUtil.getPackageInfo(context, targetFile);
-        if (packageInfo == null || packageInfo.versionCode <= GetAppInfoUtil.getAppVersionCode(context)) {
+        if (packageInfo == null || packageInfo.versionCode <= GetAppInfo.getAppVersionCode(context)) {
             new File(targetFile).delete();
             return true;
         }
@@ -554,7 +554,7 @@ public class UpdateService extends Service {
 
     //提示升级显示对话框
     private void showDialog(Context context, String updateInfo) {
-        UpdateLogUtil.d("showDialog() called with: context = [" + context + "], updateInfo = [" + updateInfo + "]");
+        UpdateLog.d("showDialog() called with: context = [" + context + "], updateInfo = [" + updateInfo + "]");
         dialog = new AlertDialog.Builder(context).setTitle("升级提示").
                 setMessage(updateInfo).setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
@@ -573,7 +573,7 @@ public class UpdateService extends Service {
 
     @Override
     public void onDestroy() {
-        UpdateLogUtil.d("onDestroy() called");
+        UpdateLog.d("onDestroy() called");
         super.onDestroy();
         stopRequestQueue();
         pauseDownload();
@@ -581,14 +581,14 @@ public class UpdateService extends Service {
     }
 
     private void pauseDownload() {
-        UpdateLogUtil.d("pauseDownload() called");
+        UpdateLog.d("pauseDownload() called");
         if (downloadId != -1) {
             FileDownloader.getImpl().pause(downloadId);
         }
     }
 
     private void stopRequestQueue() {
-        UpdateLogUtil.d("stopRequestQueue() called");
+        UpdateLog.d("stopRequestQueue() called");
         if (queue != null) {
             queue.stop();
         }
@@ -598,13 +598,13 @@ public class UpdateService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            UpdateLogUtil.d("onReceive: action -> " + action);
+            UpdateLog.d("onReceive: action -> " + action);
             if (TextUtils.equals(action, UpdateService.ACTION_CHECK_UPDATE)) {
                 if (NetUtil.isAvailable(context)) {
                     check();
                 }
             } else if (TextUtils.equals(action, ConnectivityManager.CONNECTIVITY_ACTION)) {
-                UpdateLogUtil.d("onReceive: first -> " + first);
+                UpdateLog.d("onReceive: first -> " + first);
                 if (NetUtil.isAvailable(context) && first) {
                     check();
                     first = false;
@@ -614,13 +614,13 @@ public class UpdateService extends Service {
     }
 
     private void check() {
-        UpdateLogUtil.d("check() called start");
+        UpdateLog.d("check() called start");
         //如果当前正在显示对话框不去检测升级
         if (dialog != null && dialog.isShowing()) return;
         //如果升级请求没结束，不再发起第二次请求
         if (checking()) return;
         //从网络上获取最新的版本信息
-        UpdateLogUtil.d("check() called end");
+        UpdateLog.d("check() called end");
         checkUpdateInfo();
     }
 
@@ -628,16 +628,16 @@ public class UpdateService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case INSTALL_COMPLETE:
-                    UpdateLogUtil.d("PM安装完成");
+                    UpdateLog.d("PM安装完成");
                     statusChange(OnUpdateStatusChangeListener.STATUS_INSTALL_COMPLETE);
                     break;
                 case INSTALL_START:
-                    UpdateLogUtil.d("PM开始安装");
+                    UpdateLog.d("PM开始安装");
                     ifFriendlyShowPop();
                     statusChange(OnUpdateStatusChangeListener.STATUS_INSTALL_START);
                     break;
                 case INSTALL_APP:
-                    UpdateLogUtil.d("安装APP");
+                    UpdateLog.d("安装APP");
                     startInstallApp();
                     break;
                 default:
@@ -654,17 +654,17 @@ public class UpdateService extends Service {
     }
 
     private void installPackage(File file) {
-        UpdateLogUtil.d("installPackage() called with: file = [" + file + "]");
+        UpdateLog.d("installPackage() called with: file = [" + file + "]");
         try {
             Message.obtain(mHandler, INSTALL_START).sendToTarget();
             PackageInstallObserver observer = new PackageInstallObserver();
             UpdateUtil.installPackage(UpdateService.this, file, observer);
         } catch (NoSuchMethodException e) {
-            UpdateLogUtil.e("installPackage: NoSuchMethodException", e);
+            UpdateLog.e("installPackage: NoSuchMethodException", e);
         } catch (InvocationTargetException e) {
-            UpdateLogUtil.e("installPackage: InvocationTargetException", e);
+            UpdateLog.e("installPackage: InvocationTargetException", e);
         } catch (IllegalAccessException e) {
-            UpdateLogUtil.e("installPackage: IllegalAccessException", e);
+            UpdateLog.e("installPackage: IllegalAccessException", e);
         }
     }
 

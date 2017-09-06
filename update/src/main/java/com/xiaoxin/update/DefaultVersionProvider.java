@@ -9,7 +9,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.xiaoxin.update.bean.DefaultResponse;
 import com.xiaoxin.update.bean.VersionInfo;
-import com.xiaoxin.update.util.GetAppInfoUtil;
+import com.xiaoxin.update.util.GetAppInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +28,9 @@ public class DefaultVersionProvider implements VersionInfoProvider {
 
     public static String getUpdateUrl(Context context, String model) {
         return new StringBuilder("https://xxtserver.xiao-xin.com/appVersion/verify?")
-                .append("packageName=").append(GetAppInfoUtil.getAppPackageName(context))
+                .append("packageName=").append(GetAppInfo.getAppPackageName(context))
                 .append("&platform=Android&versionCode=")
-                .append(GetAppInfoUtil.getAppVersionCode(context))
+                .append(GetAppInfo.getAppVersionCode(context))
                 .append("&model=").append(model == null ? "" : model)
                 .toString();
     }

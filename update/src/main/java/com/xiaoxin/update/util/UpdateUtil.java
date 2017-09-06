@@ -52,6 +52,6 @@ public class UpdateUtil {
         PackageManager packageManager = context.getPackageManager();
         Method method = PackageManager.class.getDeclaredMethod(INSTALL_METHOD, Uri.class,
                 IPackageInstallObserver.class, int.class, String.class);
-        method.invoke(packageManager, Uri.fromFile(file), observer, INSTALL_REPLACE_EXISTING | INSTALL_DONT_KILL_APP, GetAppInfoUtil.getAPKPackageName(context, file.getAbsolutePath()));
+        method.invoke(packageManager, Uri.fromFile(file), observer, INSTALL_REPLACE_EXISTING | INSTALL_DONT_KILL_APP, GetAppInfo.getAPKPackageName(context, file.getAbsolutePath()));
     }
 }

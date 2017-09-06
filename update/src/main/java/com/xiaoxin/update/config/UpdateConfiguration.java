@@ -7,7 +7,7 @@ import com.xiaoxin.update.DefaultVersionProvider;
 import com.xiaoxin.update.VersionInfoProvider;
 import com.xiaoxin.update.listener.OnDownloadListener;
 import com.xiaoxin.update.util.FileUtil;
-import com.xiaoxin.update.util.UpdateLogUtil;
+import com.xiaoxin.update.util.UpdateLog;
 
 import java.io.File;
 
@@ -219,7 +219,7 @@ public class UpdateConfiguration {
 
         public Builder setDebug(boolean debug) {
             this.debug = debug;
-            UpdateLogUtil.setLogFlag(this.debug);
+            UpdateLog.setLogFlag(this.debug);
             return this;
         }
 
