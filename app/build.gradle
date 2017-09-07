@@ -3,6 +3,21 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
+
+    //签名
+    signingConfigs {
+        XX001 {//方案公司的签名
+            storeFile file("keystore/xx001.keystore")
+            storePassword "Xxt'sKey"
+            keyAlias "xiaoxintongapp"
+            keyPassword "Xxt'sKey"
+        }
+        XX000 {// 自己的签名文件
+            initWith(signingConfigs.XX001)
+            storeFile file("keystore/XiaoXinTong.keystore")
+        }
+    }
+
     defaultConfig {
         applicationId "com.xiaoxin.bootloader"
         minSdkVersion 19
@@ -15,10 +30,15 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.XX001
         }
     }
 
     productFlavors {
+        v1 {
+            versionCode 1
+            versionName "1.0"
+        }
         v2 {
             versionCode 2
             versionName "2.0"

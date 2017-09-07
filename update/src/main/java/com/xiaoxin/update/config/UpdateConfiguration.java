@@ -8,6 +8,7 @@ import com.xiaoxin.update.DefaultVersionProvider;
 import com.xiaoxin.update.VersionInfoProvider;
 import com.xiaoxin.update.listener.OnDownloadListener;
 import com.xiaoxin.update.util.FileUtil;
+import com.xiaoxin.update.util.UpdateLog;
 
 import java.io.File;
 
@@ -79,6 +80,7 @@ public class UpdateConfiguration {
 
     public void setDebug(boolean debug) {
         this.debug = debug;
+        UpdateLog.setLogFlag(debug);
     }
 
     public boolean isSilence() {
