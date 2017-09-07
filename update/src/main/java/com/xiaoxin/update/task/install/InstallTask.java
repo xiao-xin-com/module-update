@@ -13,19 +13,19 @@ abstract class InstallTask implements Runnable {
     private String filePath;
     private OnInstallListener onInstallListener;
 
-    protected void dispatchOnStart() {
+    void dispatchOnStart() {
         if (onInstallListener != null) {
             onInstallListener.onStart();
         }
     }
 
-    protected void dispatchOnComplete() {
+    void dispatchOnComplete() {
         if (onInstallListener != null) {
             onInstallListener.onComplete();
         }
     }
 
-    protected void dispatchOnError(Throwable e) {
+    void dispatchOnError(Throwable e) {
         if (onInstallListener != null) {
             onInstallListener.onError(e);
         }

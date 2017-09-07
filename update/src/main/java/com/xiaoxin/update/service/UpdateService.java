@@ -40,8 +40,6 @@ public class UpdateService extends Service {
     //接收检测更新的receiver();
     private UpdateReceiver updateReceiver;
 
-    private boolean first = true;
-
     private UpdateStatusChangeObserver statusChangeObserver = ListenerHelper.getStatusChangeObserver();
 
     private CheckVersion checkVersion;
@@ -72,7 +70,6 @@ public class UpdateService extends Service {
         UpdateLog.d("onCreate() called");
         super.onCreate();
         statusChange(UpdateStatus.STATUS_NONE);
-        first = true;
         checkVersion = new CheckVersion(this);
         registerUpdateReceiver();
         initRepeatingCheck();
@@ -169,10 +166,9 @@ public class UpdateService extends Service {
                     check();
                 }
             } else if (TextUtils.equals(action, ConnectivityManager.CONNECTIVITY_ACTION)) {
-                UpdateLog.d("onReceive: first -> " + first);
-                if (NetUtil.isAvailable(context) && first) {
+                UpdateLog.d("onReceive: first -> " + checkVersion.isFirst());
+                if (NetUtil.isAvailable(context) && checkVersion.isFirst()) {
                     check();
-                    first = false;
                 }
             }
         }

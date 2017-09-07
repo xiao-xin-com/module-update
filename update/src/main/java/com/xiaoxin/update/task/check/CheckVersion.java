@@ -31,6 +31,11 @@ public class CheckVersion {
     private Request<String> updateRequest;
     private VersionInfo versionInfo;
     private Context context;
+    private boolean first = true;
+
+    public boolean isFirst() {
+        return first;
+    }
 
     public CheckVersion(Context context) {
         this.context = context.getApplicationContext();
@@ -52,6 +57,9 @@ public class CheckVersion {
 
     public void release() {
         UpdateLog.d("release() called");
+        updateRequest.cancel();
+        updateRequest = null;
+        first = true;
         queue.stop();
         FileDownloader.getImpl().pauseAll();
     }
@@ -65,11 +73,16 @@ public class CheckVersion {
             return;
         }
 
+        if (updateRequest != null) {
+            UpdateLog.e("当前正在请求，请不要那么频繁的发起。。。");
+            return;
+        }
         updateRequest = new UpdateStringRequest(updateUrl, new Response.Listener<String>() {
 
             @Override
             public void onResponse(String response) {
                 UpdateLog.d("onResponse: -> " + response);
+                first = false;
                 updateRequest = null;
                 statusChange(OnUpdateStatusChangeListener.STATUS_CHECK_COMPLETE);
                 onGetUpdateInfo(response);

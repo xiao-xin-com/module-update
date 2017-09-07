@@ -10,7 +10,7 @@ import com.xiaoxin.update.util.UpdateUtil;
  */
 
 class RootInstallTask extends InstallTask {
-    public RootInstallTask(String filePath) {
+    RootInstallTask(String filePath) {
         super(filePath);
     }
 

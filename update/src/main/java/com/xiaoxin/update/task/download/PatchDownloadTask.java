@@ -23,7 +23,7 @@ import java.io.File;
  * Created by liyuanbiao on 2017/9/7.
  */
 
-public class PatchDownloadTask {
+class PatchDownloadTask {
     private DispatchDownloadEvent downloadEvent;
     private Context context;
     private VersionInfo versionInfo;

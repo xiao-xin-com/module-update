@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
  * Created by liyuanbiao on 2017/9/6.
  */
 
-public class BaseDownloadTask implements Callable<Integer> {
+class BaseDownloadTask implements Callable<Integer> {
     private FileDownloader fileDownloader;
     private String url;
     private String targetFile;

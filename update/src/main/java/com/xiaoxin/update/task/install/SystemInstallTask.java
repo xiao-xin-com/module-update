@@ -14,7 +14,7 @@ import java.io.File;
 class SystemInstallTask extends InstallTask {
     private Context context;
 
-    public SystemInstallTask(Context context, String filePath) {
+    SystemInstallTask(Context context, String filePath) {
         super(filePath);
         this.context = context;
     }

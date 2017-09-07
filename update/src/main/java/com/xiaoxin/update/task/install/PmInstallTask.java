@@ -65,7 +65,7 @@ class PmInstallTask extends InstallTask {
     private Context context;
     private IPackageInstallObserver observer;
 
-    public PmInstallTask(Context context, String filePath, IPackageInstallObserver observer) {
+    PmInstallTask(Context context, String filePath, IPackageInstallObserver observer) {
         super(filePath);
         this.context = context;
         this.observer = observer;
