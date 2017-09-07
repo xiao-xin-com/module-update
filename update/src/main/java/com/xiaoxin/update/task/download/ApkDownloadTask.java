@@ -99,14 +99,14 @@ class ApkDownloadTask {
         }
     }
 
-    ;
-
     private void installApk() {
         UpdateLog.d("ApkDownloadTask installApk() called");
         if (SignUtils.checkMd5(UpdateManager.getTargetFile(),
                 versionInfo.getMd5checksum())) {
             new InstallApkThread(context, versionInfo).run();
+            return;
         }
+        UpdateLog.d("ApkDownloadTask installApk() md5不匹配");
     }
 
     //是否需要从无服务器下载新的apk

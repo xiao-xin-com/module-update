@@ -4,10 +4,10 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Environment;
 
-import com.xiaoxin.update.DefaultVersionProvider;
 import com.xiaoxin.update.UpdateManager;
 import com.xiaoxin.update.config.InstallMode;
 import com.xiaoxin.update.config.UpdateConfiguration;
+import com.xiaoxin.update.util.GetAppInfo;
 
 import java.io.File;
 
@@ -50,8 +50,19 @@ public class XXApplication extends Application {
         UpdateManager.init(this, configuration);
     }
 
+    //http://192.168.1.241/
     public static String getUpdateUrl(Context context) {
-        return DefaultVersionProvider.getUpdateUrl(context, "test");
+        return getUpdateUrl(context, "test");
+
+    }
+
+    public static String getUpdateUrl(Context context, String model) {
+        return new StringBuilder("http://192.168.1.241/appVersion/verify?")
+                .append("packageName=").append(GetAppInfo.getAppPackageName(context))
+                .append("&platform=Android&versionCode=")
+                .append(GetAppInfo.getAppVersionCode(context))
+                .append("&model=").append(model == null ? "" : model)
+                .toString();
     }
 
     @Override
