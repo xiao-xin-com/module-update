@@ -41,7 +41,7 @@ public class UpdateDialog {
                 setMessage(updateInfo).setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                new DownloadApkOrPatch(context, versionInfo).download();
+                new Thread(new DownloadApkOrPatch(context, versionInfo)).start();
                 dialog.dismiss();
             }
         }).setNegativeButton("取消", new DialogInterface.OnClickListener() {

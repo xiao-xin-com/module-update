@@ -75,13 +75,13 @@ public class PatchDownloadTask {
         }
 
         if (!isNeedDownload()) {
-            UpdateLog.d("PatchDownloadTask download: isNeedDownload -> " + true);
+            UpdateLog.d("PatchDownloadTask download: isNeedDownload 不需要下载，直接组合差分包");
             patchApk();
             return;
         }
 
         BaseDownloadTask baseDownloadTask = new BaseDownloadTask(patchUrl.getUrl(),
-                UpdateManager.getPatchTargetFile(), new DispatchFileDownloadListener(downloadEvent));
+                UpdateManager.getPatchTargetFile(), new MyDispatchFileDownloadListener(downloadEvent));
         try {
             baseDownloadTask.startDownload();
         } catch (Exception e) {
@@ -93,12 +93,15 @@ public class PatchDownloadTask {
         UpdateLog.d("PatchDownloadTask isNeedDownload() called");
         String patchTargetFile = UpdateManager.getPatchTargetFile();
         if (!new File(patchTargetFile).exists()) {
-            UpdateLog.d("PatchDownloadTask isNeedDownload: 文件不存在");
+            UpdateLog.d("PatchDownloadTask isNeedDownload: patch文件不存在，需要下载");
             return true;
         }
 
         if (!SignUtils.checkMd5(patchTargetFile, patchUrl.getMd5())) {
-            UpdateLog.d("PatchDownloadTask isNeedDownload: md5不匹配");
+            UpdateLog.d("PatchDownloadTask isNeedDownload: md5不匹配，需要下载");
+            if (new File(patchTargetFile).delete()) {
+                UpdateLog.d("PatchDownloadTask isNeedDownload: 删除之前的patch文件成功");
+            }
             return true;
         }
 
@@ -113,6 +116,7 @@ public class PatchDownloadTask {
         @Override
         public void completed(final com.liulishuo.filedownloader.BaseDownloadTask task) {
             super.completed(task);
+            UpdateLog.d("PatchDownloadTask patchApk() 下载完成");
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -122,13 +126,11 @@ public class PatchDownloadTask {
         }
     }
 
-    ;
-
     private void patchApk() {
         UpdateLog.d("PatchDownloadTask patchApk() called");
         final String patchPath = UpdateManager.getPatchTargetFile();
         if (!SignUtils.checkMd5(patchPath, patchUrl.getMd5())) {
-            UpdateLog.d("PatchDownloadTask patchApk: md5不匹配");
+            UpdateLog.d("PatchDownloadTask patchApk: 本地patch与服务器patch的md5不匹配，下载整包");
             downloadApk();
             return;
         }
@@ -143,6 +145,10 @@ public class PatchDownloadTask {
                     new InstallApkThread(context, versionInfo).run();
                 } else {
                     UpdateLog.d("PatchDownloadTask patchApk onComplete : md5不匹配");
+                    if (new File(patchInfo.getNewFile()).delete()) {
+                        UpdateLog.d("PatchDownloadTask isNeedDownload: 删除组合失败的apk，" +
+                                "如何不删除可能FileDownloader断点续传会错误");
+                    }
                     downloadApk();
                 }
             }
@@ -150,6 +156,7 @@ public class PatchDownloadTask {
             @Override
             public void onError(Exception e) {
                 super.onError(e);
+                UpdateLog.e("PatchDownloadTask patchApk onError : ", e);
                 downloadApk();
             }
         });
@@ -157,7 +164,7 @@ public class PatchDownloadTask {
     }
 
     private void downloadApk() {
-        UpdateLog.d("downloadApk() called");
+        UpdateLog.d("PatchDownloadTask downloadApk() called");
         ApkDownloadTask apkDownloadTask = new ApkDownloadTask(context, versionInfo);
         apkDownloadTask.setDownloadListener(downloadListener);
         apkDownloadTask.download();

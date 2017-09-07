@@ -33,15 +33,24 @@ public class XXMainActivity extends XXBaseActivity {
 
     private OnUpdateStatusChangeListener onUpdateStatusChangeListener = new OnUpdateStatusChangeListener() {
         @Override
-        public void onUpdateStatusChange(int status) {
-            mUpdateStatus.append(String.valueOf(status) + " ");
+        public void onUpdateStatusChange(final int status) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mUpdateStatus.append(String.valueOf(status) + " ");
+                }
+            });
         }
     };
 
     private OnConnectListener connectListener = new OnConnectListener() {
         @Override
         public void onConnected(Exception e) {
-            UpdateManager.check(XXMainActivity.this);
+            if (e == null) {
+                UpdateManager.check(XXMainActivity.this);
+            } else {
+                UpdateManager.reInit();
+            }
         }
     };
 

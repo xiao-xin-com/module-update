@@ -132,16 +132,8 @@ public class CheckVersion {
 
         UpdateManager.setDownloadUrl(downloadUrl);
         if (UpdateManager.isSilence()) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    DownloadApkOrPatch downloadApkOrPatch = new DownloadApkOrPatch(context, versionInfo);
-                    downloadApkOrPatch.download();
-                }
-            }).start();
-
+            new Thread(new DownloadApkOrPatch(context, versionInfo)).start();
         } else {
-
             UpdateDialog updateDialog = new UpdateDialog(context, versionInfo);
             updateDialog.showUpdateDialog();
         }

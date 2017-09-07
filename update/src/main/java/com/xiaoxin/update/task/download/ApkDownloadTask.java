@@ -67,7 +67,7 @@ class ApkDownloadTask {
         if (updateUrl == null) return;
 
         if (!isNeedDownload()) {
-            UpdateLog.d("ApkDownloadTask download: isNeedDownload -> " + true);
+            UpdateLog.d("ApkDownloadTask download: isNeedDownload -> 不需要下载，直接安装apk");
             installApk();
             return;
         }
@@ -123,6 +123,11 @@ class ApkDownloadTask {
         if (!TextUtils.equals(GetAppInfo.getAPKPackageName(context, targetFile),
                 GetAppInfo.getAppPackageName(context))) {
             UpdateLog.d("ApkDownloadTask isNeedDownload: 本地文件与本应用包名不匹配");
+            if (new File(targetFile).delete()) {
+                //此处不做处理
+                UpdateLog.d("ApkDownloadTask isNeedDownload: 删除之前的文件成功)");
+                return true;
+            }
             return true;
         }
 
@@ -132,6 +137,7 @@ class ApkDownloadTask {
             UpdateLog.d("ApkDownloadTask isNeedDownload: 本地apk的versionCode小于应用的versionCode");
             if (new File(targetFile).delete()) {
                 //此处不做处理
+                UpdateLog.d("ApkDownloadTask isNeedDownload: 删除之前的文件成功)");
                 return true;
             }
             return true;
@@ -142,6 +148,7 @@ class ApkDownloadTask {
             UpdateLog.d("ApkDownloadTask isNeedDownload: 本地下载的apk的MD5与服务器上不匹配");
             if (new File(targetFile).delete()) {
                 //此处不做处理
+                UpdateLog.d("ApkDownloadTask isNeedDownload: 删除之前的文件成功)");
                 return true;
             }
             return true;

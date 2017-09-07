@@ -78,6 +78,12 @@ public class UpdateManager {
         }
     }
 
+    public static void reInit() {
+        FileDownloader.setupOnApplicationOnCreate(((Application) UpdateManager.context));
+        startUpdateService();
+        isInit = true;
+    }
+
     public static boolean isInit() {
         return isInit;
     }
@@ -243,6 +249,7 @@ public class UpdateManager {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            isInit = false;
             connectObserver.onConnected(new ServiceConnectedException(name));
         }
     };
