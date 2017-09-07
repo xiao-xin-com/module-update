@@ -10,7 +10,7 @@ import com.xiaoxin.update.bean.VersionInfo;
 import com.xiaoxin.update.helper.DispatchDownloadEvent;
 import com.xiaoxin.update.listener.DispatchFileDownloadListener;
 import com.xiaoxin.update.listener.OnDownloadListener;
-import com.xiaoxin.update.listener.SimplePatchListener;
+import com.xiaoxin.update.listener.simple.SimplePatchListener;
 import com.xiaoxin.update.task.install.InstallApkThread;
 import com.xiaoxin.update.task.patch.PatchTask;
 import com.xiaoxin.update.util.ApkUtils;

@@ -2,6 +2,7 @@ package com.xiaoxin.update.listener;
 
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.xiaoxin.update.helper.DispatchDownloadEvent;
+import com.xiaoxin.update.listener.simple.SimpleFileDownloadListener;
 
 /**
  * Created by liyuanbiao on 2017/9/7.

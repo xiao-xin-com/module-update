@@ -1,4 +1,4 @@
-package com.xiaoxin.update.listener;
+package com.xiaoxin.update.listener.simple;
 
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;

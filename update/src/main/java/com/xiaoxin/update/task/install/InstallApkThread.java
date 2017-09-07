@@ -8,7 +8,7 @@ import android.text.TextUtils;
 import com.xiaoxin.update.UpdateManager;
 import com.xiaoxin.update.bean.VersionInfo;
 import com.xiaoxin.update.config.InstallMode;
-import com.xiaoxin.update.listener.SimpleInstallListener;
+import com.xiaoxin.update.listener.simple.SimpleInstallListener;
 import com.xiaoxin.update.ui.FriendlyDialog;
 import com.xiaoxin.update.util.CmdUtil;
 
@@ -21,7 +21,7 @@ import java.io.File;
 public class InstallApkThread implements Runnable {
     private Context context;
     private VersionInfo versionInfo;
-    FriendlyDialog friendlyDialog;
+    private FriendlyDialog friendlyDialog;
 
     public InstallApkThread(Context context, VersionInfo versionInfo) {
         this.context = context;

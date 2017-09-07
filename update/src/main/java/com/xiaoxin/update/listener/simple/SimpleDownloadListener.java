@@ -1,4 +1,6 @@
-package com.xiaoxin.update.listener;
+package com.xiaoxin.update.listener.simple;
+
+import com.xiaoxin.update.listener.OnDownloadListener;
 
 /**
  * Created by liyuanbiao on 2016/11/15.

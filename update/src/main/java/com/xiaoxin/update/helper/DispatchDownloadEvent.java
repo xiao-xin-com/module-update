@@ -55,7 +55,7 @@ public class DispatchDownloadEvent {
             downloadListener.onStart(task.getTargetFilePath());
         }
         downloadObserver.onStart(task.getTargetFilePath());
-        statusChange(isApk() ? UpdateStatus.STATUS_DOWNLOAD_START : UpdateStatus.STATUS_DOWNLOAD_START);
+        statusChange(isApk() ? UpdateStatus.STATUS_DOWNLOAD_START : UpdateStatus.STATUS_DOWNLOAD_PATCH_START);
     }
 
     public void completed(BaseDownloadTask task) {

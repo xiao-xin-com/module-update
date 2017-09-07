@@ -1,6 +1,7 @@
-package com.xiaoxin.update.listener;
+package com.xiaoxin.update.listener.simple;
 
 import com.xiaoxin.update.bean.PatchInfo;
+import com.xiaoxin.update.listener.OnPatchListener;
 
 /**
  * Created by liyuanbiao on 2017/9/7.

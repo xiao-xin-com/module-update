@@ -1,5 +1,7 @@
 package com.xiaoxin.update.listener;
 
+import com.xiaoxin.update.listener.simple.SimpleDownloadListener;
+
 /**
  * Created by liyuanbiao on 2016/9/17.
  */
