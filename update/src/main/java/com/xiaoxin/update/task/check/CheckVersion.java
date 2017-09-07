@@ -18,8 +18,11 @@ import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
 import com.xiaoxin.update.net.UpdateStringRequest;
 import com.xiaoxin.update.task.download.DownloadApkOrPatch;
 import com.xiaoxin.update.ui.UpdateDialog;
+import com.xiaoxin.update.util.FileUtil;
 import com.xiaoxin.update.util.GetAppInfo;
 import com.xiaoxin.update.util.UpdateLog;
+
+import java.io.File;
 
 /**
  * Created by liyuanbiao on 2017/9/6.
@@ -117,39 +120,69 @@ public class CheckVersion {
     //解析服务器上的apk版本信息
     private void onGetUpdateInfo(String response) {
         UpdateLog.d("onGetUpdateInfo() called");
-        VersionInfoProvider versionInfoProvider = UpdateManager.getVersionInfoProvider();
-        if (versionInfoProvider == null) {
-            UpdateLog.e("VersionInfoProvider为空,不能解析更新内容");
+        if (!verifyVersion(response)) {
+//            deleteApkAndPatch();
             return;
         }
 
-        versionInfo = versionInfoProvider.provider(response);
-        if (versionInfo == null) {
-            UpdateLog.e("VersionInfo为空,不能解析更新内容");
-            return;
-        }
-
-        String downloadUrl = versionInfo.getUpdateUrl();
-        if (TextUtils.isEmpty(downloadUrl) ||
-                TextUtils.isEmpty(downloadUrl.trim())) {
-            UpdateLog.e("Apk下载链接为空,不能下载安装包");
-            return;
-        }
-
-        int versionCode = GetAppInfo.getAppVersionCode(context);
-        if (versionCode >= versionInfo.getVersionCode()) {
-            UpdateLog.d("当前版本 " + versionCode + " ，" +
-                    "服务端版本 " + versionInfo.getVersionCode());
-            return;
-        }
-
-        UpdateManager.setDownloadUrl(downloadUrl);
         if (UpdateManager.isSilence()) {
             new Thread(new DownloadApkOrPatch(context, versionInfo)).start();
         } else {
             UpdateDialog updateDialog = new UpdateDialog(context, versionInfo);
             updateDialog.showUpdateDialog();
         }
+    }
+
+    /**
+     * 下载前删除
+     */
+    private static void deleteApkAndPatch() {
+        UpdateLog.d("deleteApkAndPatch() called");
+
+        String targetFile = UpdateManager.getTargetFile();
+        if (!TextUtils.isEmpty(targetFile)) {
+            FileUtil.delete(new File(targetFile));
+        }
+
+        String patchTargetFile = UpdateManager.getPatchTargetFile();
+        if (!TextUtils.isEmpty(patchTargetFile)) {
+            FileUtil.delete(new File(patchTargetFile));
+        }
+    }
+
+    /**
+     * @param response 服务端返回的结果
+     * @return false 不能解析，或者已经是最新版本 true，有新版本
+     */
+    private boolean verifyVersion(String response) {
+        VersionInfoProvider versionInfoProvider = UpdateManager.getVersionInfoProvider();
+        if (versionInfoProvider == null) {
+            UpdateLog.e("VersionInfoProvider为空,不能解析更新内容");
+            return false;
+        }
+
+        versionInfo = versionInfoProvider.provider(response);
+        if (versionInfo == null) {
+            UpdateLog.e("VersionInfo为空,不能解析更新内容");
+            return false;
+        }
+
+        String downloadUrl = versionInfo.getUpdateUrl();
+        if (TextUtils.isEmpty(downloadUrl) ||
+                TextUtils.isEmpty(downloadUrl.trim())) {
+            UpdateLog.e("Apk下载链接为空,不能下载安装包");
+            return false;
+        }
+
+        int versionCode = GetAppInfo.getAppVersionCode(context);
+        if (versionCode >= versionInfo.getVersionCode()) {
+            UpdateLog.d("当前版本 " + versionCode + " ，" +
+                    "服务端版本 " + versionInfo.getVersionCode());
+            return false;
+        }
+
+        UpdateManager.setDownloadUrl(downloadUrl);
+        return true;
     }
 
 }

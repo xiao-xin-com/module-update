@@ -75,7 +75,8 @@ class BaseDownloadTask implements Callable<Integer> {
         return fileDownloader.create(url).
                 setListener(fileDownloadListener)
                 .setPath(targetFile)
-                .setAutoRetryTimes(retryTime).start();
+                .setAutoRetryTimes(retryTime)
+                .start();
     }
 
     public Integer startDownload() throws Exception {
