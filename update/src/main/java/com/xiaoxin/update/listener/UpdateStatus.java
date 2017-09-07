@@ -10,8 +10,8 @@ public interface UpdateStatus {
 
     //检查更新
     int STATUS_CHECK_START = 1;
-    int STATUS_CHECK_ERROR = 2;
-    int STATUS_CHECK_COMPLETE = 3;
+    int STATUS_CHECK_COMPLETE = 2;
+    int STATUS_CHECK_ERROR = 3;
 
     //下载整包
     int STATUS_DOWNLOAD_START = 4;
