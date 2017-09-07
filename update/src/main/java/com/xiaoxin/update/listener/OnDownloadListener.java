@@ -5,11 +5,13 @@ package com.xiaoxin.update.listener;
  */
 
 public interface OnDownloadListener {
-    void onStart();
+    void onStart(String path);
 
     void onProgress(long current, long total);
 
-    void onComplete();
+    void onComplete(String path);
+
+    void onError(String path, Throwable e);
 
     OnDownloadListener EMPTY = new SimpleDownloadListener();
 }

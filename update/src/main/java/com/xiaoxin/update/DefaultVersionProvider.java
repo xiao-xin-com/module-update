@@ -8,11 +8,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.xiaoxin.update.bean.DefaultResponse;
+import com.xiaoxin.update.bean.PatchUrl;
 import com.xiaoxin.update.bean.VersionInfo;
 import com.xiaoxin.update.util.GetAppInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static android.content.ContentValues.TAG;
 
@@ -35,6 +37,12 @@ public class DefaultVersionProvider implements VersionInfoProvider {
                 .toString();
     }
 
+    private Context context;
+
+    public DefaultVersionProvider(Context context) {
+        this.context = context.getApplicationContext();
+    }
+
     @Override
     public VersionInfo provider(String s) {
         List<DefaultResponse> updateList = null;
@@ -49,8 +57,18 @@ public class DefaultVersionProvider implements VersionInfoProvider {
             VersionInfo versionInfo = new VersionInfo();
             versionInfo.setPackageName(rspUpdate.getPackageName());
             versionInfo.setVersionCode(rspUpdate.getVersionCode());
-            versionInfo.setUpdateInfo(filterEmpty(rspUpdate.getUpdateInfo()));
             versionInfo.setUpdateUrl(rspUpdate.getUpdateUrl());
+            versionInfo.setMd5checksum(rspUpdate.getMd5checksum());
+            versionInfo.setModel(rspUpdate.getModel());
+
+            Map<String, PatchUrl> patchUrl = rspUpdate.getPatchUrl();
+            if (patchUrl != null) {
+                int versionCode = GetAppInfo.getAppVersionCode(context);
+                versionInfo.setPatchUrl(patchUrl.get(String.valueOf(versionCode)));
+            }
+
+            versionInfo.setInstallFilename(rspUpdate.getInstallFilename());
+            versionInfo.setUpdateInfo(filterEmpty(rspUpdate.getUpdateInfo()));
             versionInfo.setDetail(getUpdateInfo(versionInfo.getUpdateInfo()));
             return versionInfo;
         }

@@ -5,15 +5,24 @@ package com.xiaoxin.update.listener;
  */
 
 public class SimpleDownloadListener implements OnDownloadListener {
+
     @Override
-    public void onStart() {
+    public void onStart(String path) {
+
     }
 
     @Override
     public void onProgress(long current, long total) {
+
     }
 
     @Override
-    public void onComplete() {
+    public void onComplete(String path) {
+
+    }
+
+    @Override
+    public void onError(String path, Throwable e) {
+
     }
 }

@@ -10,10 +10,10 @@ import com.xiaoxin.update.listener.OnDownloadListener;
 
 public class DownloadObserver extends Observable<OnDownloadListener> implements OnDownloadListener {
     @Override
-    public void onStart() {
+    public void onStart(String path) {
         synchronized (mObservers) {
             for (int i = mObservers.size() - 1; i >= 0; i--) {
-                mObservers.get(i).onStart();
+                mObservers.get(i).onStart(path);
             }
         }
     }
@@ -28,10 +28,19 @@ public class DownloadObserver extends Observable<OnDownloadListener> implements 
     }
 
     @Override
-    public void onComplete() {
+    public void onComplete(String path) {
         synchronized (mObservers) {
             for (int i = mObservers.size() - 1; i >= 0; i--) {
-                mObservers.get(i).onComplete();
+                mObservers.get(i).onComplete(path);
+            }
+        }
+    }
+
+    @Override
+    public void onError(String path, Throwable e) {
+        synchronized (mObservers) {
+            for (int i = mObservers.size() - 1; i >= 0; i--) {
+                mObservers.get(i).onError(path, e);
             }
         }
     }

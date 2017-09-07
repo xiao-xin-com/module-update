@@ -7,6 +7,7 @@ import android.os.RemoteException;
 import com.xiaoxin.update.helper.ListenerHelper;
 import com.xiaoxin.update.helper.UpdateStatusChangeObserver;
 import com.xiaoxin.update.listener.UpdateStatus;
+import com.xiaoxin.update.util.UpdateLog;
 import com.xiaoxin.update.util.UpdateUtil;
 
 import java.io.File;
@@ -15,7 +16,7 @@ import java.io.File;
  * Created by liyuanbiao on 2017/9/6.
  */
 
-public class PmInstallTask extends InstallTask {
+class PmInstallTask extends InstallTask {
 
     public static final int INSTALL_SUCCEEDED = 1;
     public static final int INSTALL_FAILED_ALREADY_EXISTS = -1;
@@ -74,15 +75,17 @@ public class PmInstallTask extends InstallTask {
     public void run() {
         UpdateStatusChangeObserver statusChangeObserver = getStatusChangeObserver();
         try {
+            dispatchOnStart();
             statusChangeObserver.onUpdateStatusChange(UpdateStatus.STATUS_INSTALL_START);
             UpdateUtil.startPmInstall(context, new File(getFilePath()), new PackageInstallObserver(observer));
         } catch (Exception e) {
+            dispatchOnError(e);
             statusChangeObserver.onUpdateStatusChange(UpdateStatus.STATUS_INSTALL_ERROR);
-            e.printStackTrace();
+            UpdateLog.e("PmInstallTask run: ", e);
         }
     }
 
-    private static class PackageInstallObserver extends IPackageInstallObserver.Stub {
+    private class PackageInstallObserver extends IPackageInstallObserver.Stub {
 
         private IPackageInstallObserver observer;
 
@@ -91,10 +94,18 @@ public class PmInstallTask extends InstallTask {
         }
 
         public void packageInstalled(String packageName, int returnCode) throws RemoteException {
+            if (observer != null) {
+                observer.packageInstalled(packageName, returnCode);
+            }
             UpdateStatusChangeObserver statusChangeObserver = ListenerHelper.getStatusChangeObserver();
             statusChangeObserver.onUpdateStatusChange(returnCode == INSTALL_SUCCEEDED ?
                     UpdateStatus.STATUS_INSTALL_COMPLETE : UpdateStatus.STATUS_INSTALL_ERROR);
-            observer.packageInstalled(packageName, returnCode);
+            if (returnCode == INSTALL_SUCCEEDED) {
+                dispatchOnComplete();
+            } else {
+                dispatchOnError(new IllegalStateException(packageName + " : " + returnCode));
+            }
+
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.xiaoxin.update;
 
 import android.annotation.SuppressLint;
+import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -8,13 +9,14 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import com.liulishuo.filedownloader.FileDownloader;
+import com.xiaoxin.update.config.InstallMode;
 import com.xiaoxin.update.config.UpdateConfiguration;
 import com.xiaoxin.update.exception.ServiceConnectedException;
 import com.xiaoxin.update.helper.ConnectObserver;
+import com.xiaoxin.update.helper.CurrentStatus;
 import com.xiaoxin.update.helper.ListenerHelper;
 import com.xiaoxin.update.listener.OnConnectListener;
 import com.xiaoxin.update.listener.OnDownloadListener;
-import com.xiaoxin.update.listener.UpdateStatus;
 import com.xiaoxin.update.service.UpdateService;
 import com.xiaoxin.update.util.UITask;
 
@@ -29,6 +31,7 @@ public class UpdateManager {
     @SuppressLint("StaticFieldLeak")
     private static Context context;
     //更新配置
+    @SuppressLint("StaticFieldLeak")
     private static UpdateConfiguration configuration;
     //用于更新的服务
     private static UpdateService.UpdateBinder updateBinder;
@@ -70,8 +73,7 @@ public class UpdateManager {
         if (!isInit()) {
             UpdateManager.context = context.getApplicationContext();
             UpdateManager.configuration = configuration;
-            isInit = true;
-            FileDownloader.setup(getContext());
+            FileDownloader.setupOnApplicationOnCreate(((Application) UpdateManager.context));
             startUpdateService();
         }
     }
@@ -109,10 +111,131 @@ public class UpdateManager {
         }
     }
 
+    public static Context getContext() {
+        return configuration.getContext();
+    }
+
+    public static void setContext(Context context) {
+        configuration.setContext(context);
+    }
+
+    public static String getUpdateUrl() {
+        return configuration.getUpdateUrl();
+    }
+
+    public static void setUpdateUrl(String updateUrl) {
+        configuration.setUpdateUrl(updateUrl);
+    }
+
+    public static String getTargetFile() {
+        return configuration.getTargetFile();
+    }
+
+    public static void setTargetFile(String targetFile) {
+        configuration.setTargetFile(targetFile);
+    }
+
+    public static boolean isDebug() {
+        return configuration.isDebug();
+    }
+
+    public static void setDebug(boolean debug) {
+        configuration.setDebug(debug);
+    }
+
+    public static boolean isSilence() {
+        return configuration.isSilence();
+    }
+
+    public static void setSilence(boolean silence) {
+        configuration.setSilence(silence);
+    }
+
+    public static boolean isShowUI() {
+        return configuration.isShowUI();
+    }
+
+    public static void setShowUI(boolean showUI) {
+        configuration.setShowUI(showUI);
+    }
+
+    public static boolean isIncrement() {
+        return configuration.isIncrement();
+    }
+
+    public static void setIncrement(boolean increment) {
+        configuration.setIncrement(increment);
+    }
+
+    public static InstallMode getInstallMode() {
+        return configuration.getInstallMode();
+    }
+
+    public static void setInstallMode(InstallMode installMode) {
+        configuration.setInstallMode(installMode);
+    }
+
+    public static boolean isFriendly() {
+        return configuration.isFriendly();
+    }
+
+    public static void setFriendly(boolean friendly) {
+        configuration.setFriendly(friendly);
+    }
+
+    public static int getIcon() {
+        return configuration.getIcon();
+    }
+
+    public static void setIcon(int icon) {
+        configuration.setIcon(icon);
+    }
+
+    public static VersionInfoProvider getVersionInfoProvider() {
+        return configuration.getVersionInfoProvider();
+    }
+
+    public static void setVersionInfoProvider(VersionInfoProvider versionInfoProvider) {
+        configuration.setVersionInfoProvider(versionInfoProvider);
+    }
+
+    public static OnDownloadListener getDownloadListener() {
+        return configuration.getDownloadListener();
+    }
+
+    public static void setDownloadListener(OnDownloadListener downloadListener) {
+        configuration.setDownloadListener(downloadListener);
+    }
+
+    public static long getCheckSpan() {
+        return configuration.getCheckSpan();
+    }
+
+    public static void setCheckSpan(long checkSpan) {
+        configuration.setCheckSpan(checkSpan);
+    }
+
+    public static String getDownloadUrl() {
+        return configuration.getDownloadUrl();
+    }
+
+    public static void setDownloadUrl(String downloadUrl) {
+        configuration.setDownloadUrl(downloadUrl);
+    }
+
+    public static String getPatchTargetFile() {
+        return configuration.getPatchTargetFile();
+    }
+
+    public static void setPatchTargetFile(String patchTargetFile) {
+        configuration.setPatchTargetFile(patchTargetFile);
+    }
+
     private static ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (service instanceof UpdateService.UpdateBinder) {
+                isInit = true;
                 connectObserver.onConnected(null);
                 updateBinder = (UpdateService.UpdateBinder) service;
             }
@@ -124,118 +247,21 @@ public class UpdateManager {
         }
     };
 
+    public static UpdateConfiguration getConfiguration() {
+        return configuration;
+    }
 
     public static int getStatus() {
         if (updateBinder != null && updateBinder.isBinderAlive()) {
             return updateBinder.getStatus();
         }
-        return UpdateStatus.STATUS_NONE;
+        return CurrentStatus.getStatus();
     }
 
-    public static UpdateConfiguration setFriendly(boolean friendly) {
-        return configuration.setFriendly(friendly);
-    }
-
-    public static boolean isFriendly() {
-        return configuration.isFriendly();
-    }
-
-    public static int getIcon() {
-        return configuration.getIcon();
-    }
-
-    public static UpdateConfiguration setIcon(int icon) {
-        return configuration.setIcon(icon);
-    }
-
-    public static boolean isShowUI() {
-        return configuration.isShowUI();
-    }
-
-    public static UpdateConfiguration setShowUI(boolean showUI) {
-        return configuration.setShowUI(showUI);
-    }
-
-    public static String getUpdateUrl() {
-        return configuration.getUpdateUrl();
-    }
-
-    public static String getTargetFile() {
-        return configuration.getTargetFile();
-    }
-
-    public static void setTargetFile(String targetFile) {
-        configuration.setTargetFile(targetFile);
-    }
-
-    public static OnDownloadListener getDownloadListener() {
-        return configuration.getDownloadListener();
-    }
-
-    public static boolean isDebug() {
-        return configuration.isDebug();
-    }
-
-    public static void setUpdateUrl(String updateUrl) {
-        configuration.setUpdateUrl(updateUrl);
-    }
-
-    public static void setDebug(boolean debug) {
-        configuration.setDebug(debug);
-    }
-
-    public static void setDownloadListener(OnDownloadListener downloadListener) {
-        configuration.setDownloadListener(downloadListener);
-    }
-
-    public static VersionInfoProvider getVersionInfoProvider() {
-        return configuration.getVersionInfoProvider();
-    }
-
-    public static boolean isSilence() {
-        return configuration.isSilence();
-    }
-
-    public static UpdateConfiguration setSilence(boolean silence) {
-        return configuration.setSilence(silence);
-    }
-
-    public static UpdateConfiguration setVersionInfoProvider(VersionInfoProvider versionInfoProvider) {
-        return configuration.setVersionInfoProvider(versionInfoProvider);
-    }
-
-    public static boolean isUsePm() {
-        return configuration.isUsePm();
-    }
-
-    public static String getDownloadUrl() {
-        return configuration.getDownloadUrl();
-    }
-
-    public static UpdateConfiguration setUsePm(boolean usePm) {
-        return configuration.setUsePm(usePm);
-    }
-
-    public static UpdateConfiguration setDownloadUrl(String downloadUrl) {
-        return configuration.setDownloadUrl(downloadUrl);
-    }
-
-    public static long getCheckSpan() {
-        return configuration.getCheckSpan();
-    }
-
-    public static void setCheckSpan(long checkSpan) {
-        configuration.setCheckSpan(checkSpan);
-    }
-
-    public static Context getContext() {
-        return context;
-    }
 
     public static WeakReference<Context> getActivityContext() {
         return activityContext;
     }
-
 
     public static void onResume(Context context) {
         if (activityContext == null || activityContext.get() == null) {
