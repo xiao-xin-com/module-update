@@ -306,8 +306,9 @@ public class UpdateConfiguration {
             return configuration.getPatchTargetFile();
         }
 
-        public void setPatchTargetFile(String patchTargetFile) {
+        public Builder setPatchTargetFile(String patchTargetFile) {
             configuration.setPatchTargetFile(patchTargetFile);
+            return this;
         }
 
         public UpdateConfiguration build() {

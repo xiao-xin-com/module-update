@@ -7,6 +7,7 @@ import android.widget.TextView;
 import com.xiaoxin.bootloader.R;
 import com.xiaoxin.bootloader.ui.activity.base.XXBaseActivity;
 import com.xiaoxin.update.UpdateManager;
+import com.xiaoxin.update.listener.OnConnectListener;
 
 
 public class XXMainActivity extends XXBaseActivity {
@@ -19,7 +20,24 @@ public class XXMainActivity extends XXBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        UpdateManager.check(this);
+        if (UpdateManager.isInit()) {
+            UpdateManager.check(this);
+        }
+        UpdateManager.registerOnConnectListener(connectListener);
+    }
+
+
+    private OnConnectListener connectListener = new OnConnectListener() {
+        @Override
+        public void onConnected(Exception e) {
+            UpdateManager.check(XXMainActivity.this);
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        UpdateManager.unregisterOnConnectListener(connectListener);
     }
 
     private void initView() {

@@ -128,6 +128,7 @@ public class CheckVersion {
             return;
         }
 
+        UpdateManager.setDownloadUrl(downloadUrl);
         if (UpdateManager.isSilence()) {
             new Thread(new Runnable() {
                 @Override
