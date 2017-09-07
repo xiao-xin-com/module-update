@@ -46,10 +46,12 @@ public class CheckVersion {
     }
 
     public void check() {
+        UpdateLog.d("check() called");
         checkUpdateInfo();
     }
 
     public void release() {
+        UpdateLog.d("release() called");
         queue.stop();
         FileDownloader.getImpl().pauseAll();
     }

@@ -62,10 +62,12 @@ class ApkDownloadTask {
     }
 
     public void download() {
+        UpdateLog.d("ApkDownloadTask download() called");
         String updateUrl = versionInfo.getUpdateUrl();
         if (updateUrl == null) return;
 
         if (!isNeedDownload()) {
+            UpdateLog.d("ApkDownloadTask download: isNeedDownload -> " + true);
             installApk();
             return;
         }
@@ -75,7 +77,7 @@ class ApkDownloadTask {
         try {
             baseDownloadTask.startDownload();
         } catch (Exception e) {
-            UpdateLog.e("download: ", e);
+            UpdateLog.e("ApkDownloadTask download: ", e);
         }
     }
 
@@ -100,6 +102,7 @@ class ApkDownloadTask {
     ;
 
     private void installApk() {
+        UpdateLog.d("ApkDownloadTask installApk() called");
         if (SignUtils.checkMd5(UpdateManager.getTargetFile(),
                 versionInfo.getMd5checksum())) {
             new InstallApkThread(context, versionInfo).run();
@@ -108,21 +111,25 @@ class ApkDownloadTask {
 
     //是否需要从无服务器下载新的apk
     private boolean isNeedDownload() {
+        UpdateLog.d("ApkDownloadTask isNeedDownload() called");
         //文件不存在
         final String targetFile = UpdateManager.getTargetFile();
         if (TextUtils.isEmpty(targetFile) || !new File(targetFile).exists()) {
+            UpdateLog.d("ApkDownloadTask isNeedDownload: 文件不存在");
             return true;
         }
 
-        //下载的应用于本应用包名不匹配
+        //本地文件与本应用包名不匹配
         if (!TextUtils.equals(GetAppInfo.getAPKPackageName(context, targetFile),
                 GetAppInfo.getAppPackageName(context))) {
+            UpdateLog.d("ApkDownloadTask isNeedDownload: 本地文件与本应用包名不匹配");
             return true;
         }
 
         //本地apk的versionCode小于应用的versionCode
         PackageInfo packageInfo = UpdateUtil.getPackageInfo(context, targetFile);
         if (packageInfo == null || packageInfo.versionCode < GetAppInfo.getAppVersionCode(context)) {
+            UpdateLog.d("ApkDownloadTask isNeedDownload: 本地apk的versionCode小于应用的versionCode");
             if (new File(targetFile).delete()) {
                 //此处不做处理
                 return true;
@@ -130,8 +137,9 @@ class ApkDownloadTask {
             return true;
         }
 
-        //本地下载的apkMD5与服务器上不匹配
+        //本地下载的apk的MD5与服务器上不匹配
         if (!SignUtils.checkMd5(targetFile, versionInfo.getMd5checksum())) {
+            UpdateLog.d("ApkDownloadTask isNeedDownload: 本地下载的apk的MD5与服务器上不匹配");
             if (new File(targetFile).delete()) {
                 //此处不做处理
                 return true;

@@ -1,5 +1,6 @@
 package com.xiaoxin.update.service;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -33,7 +34,7 @@ public class UpdateService extends Service {
 //    public static final long INTERNAL_CHECK_TIME = AlarmManager.INTERVAL_HALF_DAY;
 //    public static final int DELAY_CHECK_TIME = (int) (1000 * 60 * 60 * 0.5);
 
-    //    public static final long INTERNAL_CHECK_TIME = AlarmManager.INTERVAL_FIFTEEN_MINUTES / 5;
+//    public static final long INTERNAL_CHECK_TIME = AlarmManager.INTERVAL_FIFTEEN_MINUTES / 5;
 //    public static final int DELAY_CHECK_TIME = (int) (1000 * 60);
 
     //接收检测更新的receiver();
@@ -41,12 +42,9 @@ public class UpdateService extends Service {
 
     private boolean first = true;
 
-    private UpdateStatusChangeObserver statusChangeObserver;
-    private CheckVersion checkVersion;
+    private UpdateStatusChangeObserver statusChangeObserver = ListenerHelper.getStatusChangeObserver();
 
-    {
-        statusChangeObserver = ListenerHelper.getStatusChangeObserver();
-    }
+    private CheckVersion checkVersion;
 
     private UpdateBinder updateBinder = new UpdateBinder();
 
@@ -68,7 +66,6 @@ public class UpdateService extends Service {
             return UpdateService.this.getStatus();
         }
     }
-
 
     @Override
     public void onCreate() {
@@ -105,6 +102,7 @@ public class UpdateService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    @SuppressLint("SimpleDateFormat")
     private void setRepeatingCheck() {
         UpdateLog.d("setRepeatingCheck() called");
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -183,9 +181,10 @@ public class UpdateService extends Service {
     private void check() {
         UpdateLog.d("check() called start");
         //如果升级请求没结束，不再发起第二次请求
-        if (checkVersion.isChecking()) return;
+        boolean checking = checkVersion.isChecking();
+        UpdateLog.d("check() called checking -> " + checking);
+        if (checking) return;
         //从网络上获取最新的版本信息
-        UpdateLog.d("check() called end");
         checkVersion.check();
     }
 

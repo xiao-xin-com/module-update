@@ -68,7 +68,8 @@ public class SignUtils {
      */
     public static boolean checkMd5(File file, String md5) {
         if (TextUtils.isEmpty(md5)) {
-            throw new RuntimeException("md5 cannot be empty");
+//            throw new RuntimeException("md5 cannot be empty");
+            return false;
         }
 
         String fileMd5 = getMd5ByFile(file);

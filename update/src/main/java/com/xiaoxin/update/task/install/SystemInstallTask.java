@@ -2,6 +2,7 @@ package com.xiaoxin.update.task.install;
 
 import android.content.Context;
 
+import com.xiaoxin.update.util.UpdateLog;
 import com.xiaoxin.update.util.UpdateUtil;
 
 import java.io.File;
@@ -20,6 +21,7 @@ class SystemInstallTask extends InstallTask {
 
     @Override
     public void run() {
+        UpdateLog.d("SystemInstallTask run() called");
         UpdateUtil.startSystemInstall(context, new File(getFilePath()));
     }
 }

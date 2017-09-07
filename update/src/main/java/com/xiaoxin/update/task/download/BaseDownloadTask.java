@@ -2,6 +2,7 @@ package com.xiaoxin.update.task.download;
 
 import com.liulishuo.filedownloader.FileDownloadListener;
 import com.liulishuo.filedownloader.FileDownloader;
+import com.xiaoxin.update.util.UpdateLog;
 
 import java.util.concurrent.Callable;
 
@@ -70,6 +71,7 @@ public class BaseDownloadTask implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+        UpdateLog.d("startDownload() called with: url = [" + url + "], targetFile = [" + targetFile + "], retryTime = [" + retryTime + "]");
         return fileDownloader.create(url).
                 setListener(fileDownloadListener)
                 .setPath(targetFile)

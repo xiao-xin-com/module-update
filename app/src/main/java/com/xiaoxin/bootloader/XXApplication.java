@@ -51,7 +51,7 @@ public class XXApplication extends Application {
     }
 
     public static String getUpdateUrl(Context context) {
-        return DefaultVersionProvider.getUpdateUrl(context);
+        return DefaultVersionProvider.getUpdateUrl(context, "test");
     }
 
     @Override

@@ -68,17 +68,20 @@ public class PatchTask implements Runnable {
 
     @Override
     public void run() {
+        UpdateLog.d("PatchTask run() called");
         try {
+            UpdateLog.d("PatchTask run() prepare");
             PatchInfo patchInfo = getPatchInfo();
             dispatchOnPrepare(patchInfo);
             statusChangeObserver.onUpdateStatusChange(UpdateStatus.STATUS_PATCH_PREPARE);
             PatchUtils.patch(oldFile, newFile, patchFile);
+            UpdateLog.d("PatchTask run() complete");
             dispatchOnComplete(patchInfo);
             statusChangeObserver.onUpdateStatusChange(UpdateStatus.STATUS_PATCH_COMPLETE);
         } catch (Exception e) {
             dispatchOnError(e);
             statusChangeObserver.onUpdateStatusChange(UpdateStatus.STATUS_PATCH_ERROR);
-            UpdateLog.e("run patch: ", e);
+            UpdateLog.e("PatchTask run patch: ", e);
         }
     }
 

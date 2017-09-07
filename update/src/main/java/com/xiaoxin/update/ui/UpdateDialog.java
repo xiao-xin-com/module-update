@@ -36,7 +36,7 @@ public class UpdateDialog {
 
     //提示升级显示对话框
     private void showDialog(final Context context, String updateInfo) {
-        UpdateLog.d("showDialog() called with: context = [" + context + "], updateInfo = [" + updateInfo + "]");
+        UpdateLog.d("UpdateDialog showDialog() called with: context = [" + context + "], updateInfo = [" + updateInfo + "]");
         AlertDialog dialog = new AlertDialog.Builder(context).setTitle("升级提示").
                 setMessage(updateInfo).setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override

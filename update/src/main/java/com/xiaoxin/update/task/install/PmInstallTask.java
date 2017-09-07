@@ -73,8 +73,10 @@ class PmInstallTask extends InstallTask {
 
     @Override
     public void run() {
+        UpdateLog.d("PmInstallTask run() called");
         UpdateStatusChangeObserver statusChangeObserver = getStatusChangeObserver();
         try {
+            UpdateLog.d("PmInstallTask run() start");
             dispatchOnStart();
             statusChangeObserver.onUpdateStatusChange(UpdateStatus.STATUS_INSTALL_START);
             UpdateUtil.startPmInstall(context, new File(getFilePath()), new PackageInstallObserver(observer));
@@ -101,8 +103,11 @@ class PmInstallTask extends InstallTask {
             statusChangeObserver.onUpdateStatusChange(returnCode == INSTALL_SUCCEEDED ?
                     UpdateStatus.STATUS_INSTALL_COMPLETE : UpdateStatus.STATUS_INSTALL_ERROR);
             if (returnCode == INSTALL_SUCCEEDED) {
+                UpdateLog.d("PmInstallTask run() complete");
                 dispatchOnComplete();
             } else {
+                UpdateLog.d("PmInstallTask run() error " +
+                        "packageName: " + packageName + "\treturnCode: " + returnCode);
                 dispatchOnError(new IllegalStateException(packageName + " : " + returnCode));
             }
 

@@ -5,6 +5,7 @@ import android.support.v7.app.AlertDialog;
 import com.xiaoxin.update.DefaultVersionProvider;
 import com.xiaoxin.update.UpdateManager;
 import com.xiaoxin.update.bean.VersionInfo;
+import com.xiaoxin.update.util.UpdateLog;
 
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class FriendlyDialog {
                     .setTitle("应用升级中，请稍候...")
                     .setMessage(getFriendlyMessage())
                     .show();
+            UpdateLog.d("FriendlyDialog showFriendlyDialog: show");
         }
     }
 
@@ -56,6 +58,7 @@ public class FriendlyDialog {
             String updateInfo = DefaultVersionProvider.getUpdateInfo(updateList);
             msgBuilder.append(updateInfo);
         }
+        UpdateLog.d("FriendlyDialog getFriendlyMessage: " + msgBuilder);
         return msgBuilder.toString();
     }
 

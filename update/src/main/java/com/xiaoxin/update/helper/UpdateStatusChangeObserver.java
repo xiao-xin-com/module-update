@@ -3,6 +3,7 @@ package com.xiaoxin.update.helper;
 import android.database.Observable;
 
 import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
+import com.xiaoxin.update.util.UpdateLog;
 
 /**
  * Created by liyuanbiao on 2016/11/16.
@@ -12,6 +13,7 @@ public class UpdateStatusChangeObserver extends Observable<OnUpdateStatusChangeL
 
     @Override
     public void onUpdateStatusChange(final int status) {
+        UpdateLog.i("onUpdateStatusChange() called with: status = [" + status + "]");
         synchronized (mObservers) {
             CurrentStatus.setStatus(status);
             for (int i = mObservers.size() - 1; i >= 0; i--) {

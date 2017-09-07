@@ -65,14 +65,17 @@ public class PatchDownloadTask {
     }
 
     public void download() {
+        UpdateLog.d("PatchDownloadTask download() called");
         patchUrl = versionInfo.getPatchUrl();
 
         if (patchUrl == null || TextUtils.isEmpty(patchUrl.getUrl())) {
+            UpdateLog.d("PatchDownloadTask download: 差分包不存在");
             downloadApk();
             return;
         }
 
         if (!isNeedDownload()) {
+            UpdateLog.d("PatchDownloadTask download: isNeedDownload -> " + true);
             patchApk();
             return;
         }
@@ -82,17 +85,20 @@ public class PatchDownloadTask {
         try {
             baseDownloadTask.startDownload();
         } catch (Exception e) {
-            UpdateLog.e("download: ", e);
+            UpdateLog.e("PatchDownloadTask download: ", e);
         }
     }
 
     private boolean isNeedDownload() {
+        UpdateLog.d("PatchDownloadTask isNeedDownload() called");
         String patchTargetFile = UpdateManager.getPatchTargetFile();
         if (!new File(patchTargetFile).exists()) {
+            UpdateLog.d("PatchDownloadTask isNeedDownload: 文件不存在");
             return true;
         }
 
         if (!SignUtils.checkMd5(patchTargetFile, patchUrl.getMd5())) {
+            UpdateLog.d("PatchDownloadTask isNeedDownload: md5不匹配");
             return true;
         }
 
@@ -119,8 +125,10 @@ public class PatchDownloadTask {
     ;
 
     private void patchApk() {
+        UpdateLog.d("PatchDownloadTask patchApk() called");
         final String patchPath = UpdateManager.getPatchTargetFile();
         if (!SignUtils.checkMd5(patchPath, patchUrl.getMd5())) {
+            UpdateLog.d("PatchDownloadTask patchApk: md5不匹配");
             downloadApk();
             return;
         }
@@ -134,6 +142,7 @@ public class PatchDownloadTask {
                 if (SignUtils.checkMd5(patchInfo.getNewFile(), versionInfo.getMd5checksum())) {
                     new InstallApkThread(context, versionInfo).run();
                 } else {
+                    UpdateLog.d("PatchDownloadTask patchApk onComplete : md5不匹配");
                     downloadApk();
                 }
             }
@@ -148,6 +157,7 @@ public class PatchDownloadTask {
     }
 
     private void downloadApk() {
+        UpdateLog.d("downloadApk() called");
         ApkDownloadTask apkDownloadTask = new ApkDownloadTask(context, versionInfo);
         apkDownloadTask.setDownloadListener(downloadListener);
         apkDownloadTask.download();

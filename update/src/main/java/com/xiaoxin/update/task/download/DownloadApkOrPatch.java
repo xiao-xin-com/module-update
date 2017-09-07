@@ -5,6 +5,7 @@ import android.content.Context;
 import com.xiaoxin.update.UpdateManager;
 import com.xiaoxin.update.bean.VersionInfo;
 import com.xiaoxin.update.listener.OnDownloadListener;
+import com.xiaoxin.update.util.UpdateLog;
 
 /**
  * Created by liyuanbiao on 2017/9/7.
@@ -45,6 +46,7 @@ public class DownloadApkOrPatch {
     }
 
     public void download() {
+        UpdateLog.d("DownloadApkOrPatch download() called");
         if (UpdateManager.isIncrement()) {
             if (versionInfo.getPatchUrl() != null) {
                 downloadPatch();
@@ -55,12 +57,14 @@ public class DownloadApkOrPatch {
     }
 
     private void downloadApk() {
+        UpdateLog.d("DownloadApkOrPatch downloadApk() called");
         ApkDownloadTask apkDownloadTask = new ApkDownloadTask(context, versionInfo);
         apkDownloadTask.setDownloadListener(downloadListener);
         apkDownloadTask.download();
     }
 
     private void downloadPatch() {
+        UpdateLog.d("DownloadApkOrPatch downloadPatch() called");
         PatchDownloadTask patchDownloadTask = new PatchDownloadTask(context, versionInfo);
         patchDownloadTask.setDownloadListener(downloadListener);
         patchDownloadTask.download();
