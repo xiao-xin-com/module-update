@@ -52,14 +52,14 @@ public class InstallApkThread implements Runnable {
                     @Override
                     public void onStart() {
                         super.onStart();
-                        UpdateLog.d("InstallApkThread run: InstallMode SYSTEM START");
+                        UpdateLog.d("InstallApkThread run: InstallMode PM START");
                         friendlyDialog.ifFriendlyShowDialog();
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         super.onError(e);
-                        UpdateLog.d("InstallApkThread run: InstallMode ERROR");
+                        UpdateLog.d("InstallApkThread run: InstallMode PM ERROR");
                         //pm安装失败选择系统安装
                         systemInstall(targetFile);
                     }
