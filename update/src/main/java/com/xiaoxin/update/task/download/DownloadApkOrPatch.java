@@ -4,7 +4,9 @@ import android.content.Context;
 
 import com.xiaoxin.update.UpdateManager;
 import com.xiaoxin.update.bean.VersionInfo;
+import com.xiaoxin.update.helper.CurrentStatus;
 import com.xiaoxin.update.listener.OnDownloadListener;
+import com.xiaoxin.update.listener.UpdateStatus;
 import com.xiaoxin.update.task.install.InstallApkThread;
 import com.xiaoxin.update.util.SignUtils;
 import com.xiaoxin.update.util.ThreadTask;
@@ -68,6 +70,16 @@ public class DownloadApkOrPatch implements Runnable {
                 UpdateLog.d("DownloadApkOrPatch download() " +
                         "本地文件已存在,但是md5不对，把它删除");
             }
+        }
+
+        int status = CurrentStatus.getStatus();
+        UpdateLog.d("DownloadApkOrPatch download() CurrentStatus -> " + status);
+        if (status == UpdateStatus.STATUS_DOWNLOAD_PATCH_START ||
+                status == UpdateStatus.STATUS_DOWNLOADING_PATCH ||
+                status == UpdateStatus.STATUS_DOWNLOAD_START ||
+                status == UpdateStatus.STATUS_DOWNLOADING) {
+            UpdateLog.d("DownloadApkOrPatch download() 当前有下载任务正在进行");
+            return;
         }
         if (UpdateManager.isIncrement()) {
             if (versionInfo.getPatchUrl() != null) {
