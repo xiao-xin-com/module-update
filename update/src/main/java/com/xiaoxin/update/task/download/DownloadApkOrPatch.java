@@ -86,6 +86,7 @@ public class DownloadApkOrPatch implements Runnable {
                 downloadPatch();
                 return;
             }
+            UpdateLog.d("DownloadApkOrPatch download() 虽然设置了增量升级，但是差分包却不存在");
         }
         downloadApk();
     }

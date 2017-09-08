@@ -13,8 +13,10 @@ import com.liulishuo.filedownloader.FileDownloader;
 import com.xiaoxin.update.UpdateManager;
 import com.xiaoxin.update.VersionInfoProvider;
 import com.xiaoxin.update.bean.VersionInfo;
+import com.xiaoxin.update.helper.CurrentStatus;
 import com.xiaoxin.update.helper.ListenerHelper;
 import com.xiaoxin.update.listener.OnUpdateStatusChangeListener;
+import com.xiaoxin.update.listener.UpdateStatus;
 import com.xiaoxin.update.net.UpdateStringRequest;
 import com.xiaoxin.update.task.download.DownloadApkOrPatch;
 import com.xiaoxin.update.ui.UpdateDialog;
@@ -55,12 +57,12 @@ public class CheckVersion {
     }
 
     public void check() {
-        UpdateLog.d("check() called");
+        UpdateLog.d("CheckVersion check() called");
         checkUpdateInfo();
     }
 
     public void release() {
-        UpdateLog.d("release() called");
+        UpdateLog.d("CheckVersion release() called");
         updateRequest.cancel();
         updateRequest = null;
         first = true;
@@ -70,22 +72,33 @@ public class CheckVersion {
 
     //获取服务器的版本
     private void checkUpdateInfo() {
-        UpdateLog.d("checkUpdateInfo() called");
+        UpdateLog.d("CheckVersion checkUpdateInfo() called");
         String updateUrl = UpdateManager.getUpdateUrl();
         if (TextUtils.isEmpty(updateUrl)) {
-            UpdateLog.e("验证版本的链接为空");
+            UpdateLog.e("CheckVersion 验证版本的链接为空");
             return;
         }
 
         if (updateRequest != null) {
-            UpdateLog.e("当前正在请求，请不要那么频繁的发起。。。");
+            UpdateLog.e("CheckVersion 当前正在请求，请不要那么频繁的发起。。。");
             return;
         }
+
+        int status = CurrentStatus.getStatus();
+        UpdateLog.d("CheckVersion CurrentStatus -> " + status);
+        if (status == UpdateStatus.STATUS_DOWNLOAD_PATCH_START ||
+                status == UpdateStatus.STATUS_DOWNLOADING_PATCH ||
+                status == UpdateStatus.STATUS_DOWNLOAD_START ||
+                status == UpdateStatus.STATUS_DOWNLOADING) {
+            UpdateLog.d("CheckVersion , 当前有下载任务正在进行");
+            return;
+        }
+
         updateRequest = new UpdateStringRequest(updateUrl, new Response.Listener<String>() {
 
             @Override
             public void onResponse(String response) {
-                UpdateLog.d("onResponse: -> " + response);
+                UpdateLog.d("CheckVersion onResponse: -> " + response);
                 first = false;
                 updateRequest = null;
                 statusChange(OnUpdateStatusChangeListener.STATUS_CHECK_COMPLETE);
@@ -95,7 +108,7 @@ public class CheckVersion {
             @Override
             public void onErrorResponse(VolleyError error) {
                 updateRequest = null;
-                UpdateLog.e("网络错误...");
+                UpdateLog.e("CheckVersion 网络错误...");
                 UpdateLog.e(error);
                 statusChange(OnUpdateStatusChangeListener.STATUS_CHECK_ERROR);
             }
@@ -120,7 +133,7 @@ public class CheckVersion {
 
     //解析服务器上的apk版本信息
     private void onGetUpdateInfo(String response) {
-        UpdateLog.d("onGetUpdateInfo() called");
+        UpdateLog.d("CheckVersion onGetUpdateInfo() called");
         if (!verifyVersion(response)) {
 //            deleteApkAndPatch();
             return;
@@ -138,7 +151,7 @@ public class CheckVersion {
      * 下载前删除
      */
     private static void deleteApkAndPatch() {
-        UpdateLog.d("deleteApkAndPatch() called");
+        UpdateLog.d("CheckVersion deleteApkAndPatch() called");
 
         String targetFile = UpdateManager.getTargetFile();
         if (!TextUtils.isEmpty(targetFile)) {
@@ -158,26 +171,26 @@ public class CheckVersion {
     private boolean verifyVersion(String response) {
         VersionInfoProvider versionInfoProvider = UpdateManager.getVersionInfoProvider();
         if (versionInfoProvider == null) {
-            UpdateLog.e("VersionInfoProvider为空,不能解析更新内容");
+            UpdateLog.e("CheckVersion VersionInfoProvider为空,不能解析更新内容");
             return false;
         }
 
         versionInfo = versionInfoProvider.provider(response);
         if (versionInfo == null) {
-            UpdateLog.e("VersionInfo为空,不能解析更新内容");
+            UpdateLog.e("CheckVersion VersionInfo为空,不能解析更新内容");
             return false;
         }
 
         String downloadUrl = versionInfo.getUpdateUrl();
         if (TextUtils.isEmpty(downloadUrl) ||
                 TextUtils.isEmpty(downloadUrl.trim())) {
-            UpdateLog.e("Apk下载链接为空,不能下载安装包");
+            UpdateLog.e("CheckVersion Apk下载链接为空,不能下载安装包");
             return false;
         }
 
         int versionCode = GetAppInfo.getAppVersionCode(context);
         if (versionCode >= versionInfo.getVersionCode()) {
-            UpdateLog.d("当前版本 " + versionCode + " ，" +
+            UpdateLog.d("CheckVersion 当前版本 " + versionCode + " ，" +
                     "服务端版本 " + versionInfo.getVersionCode());
             return false;
         }
