@@ -20,6 +20,7 @@ import com.xiaoxin.update.task.download.DownloadApkOrPatch;
 import com.xiaoxin.update.ui.UpdateDialog;
 import com.xiaoxin.update.util.FileUtil;
 import com.xiaoxin.update.util.GetAppInfo;
+import com.xiaoxin.update.util.ThreadTask;
 import com.xiaoxin.update.util.UpdateLog;
 
 import java.io.File;
@@ -126,7 +127,7 @@ public class CheckVersion {
         }
 
         if (UpdateManager.isSilence()) {
-            new Thread(new DownloadApkOrPatch(context, versionInfo)).start();
+            ThreadTask.submit(new DownloadApkOrPatch(context, versionInfo));
         } else {
             UpdateDialog updateDialog = new UpdateDialog(context, versionInfo);
             updateDialog.showUpdateDialog();

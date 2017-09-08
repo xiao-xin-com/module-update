@@ -15,6 +15,7 @@ import com.xiaoxin.update.task.install.InstallApkThread;
 import com.xiaoxin.update.task.patch.PatchTask;
 import com.xiaoxin.update.util.ApkUtils;
 import com.xiaoxin.update.util.SignUtils;
+import com.xiaoxin.update.util.ThreadTask;
 import com.xiaoxin.update.util.UpdateLog;
 
 import java.io.File;
@@ -117,12 +118,12 @@ class PatchDownloadTask {
         public void completed(final com.liulishuo.filedownloader.BaseDownloadTask task) {
             super.completed(task);
             UpdateLog.d("PatchDownloadTask patchApk() 下载完成");
-            new Thread(new Runnable() {
+            ThreadTask.execute(new Runnable() {
                 @Override
                 public void run() {
                     patchApk();
                 }
-            }).start();
+            });
         }
     }
 

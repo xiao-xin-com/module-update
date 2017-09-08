@@ -8,6 +8,7 @@ import com.xiaoxin.update.UpdateManager;
 import com.xiaoxin.update.bean.VersionInfo;
 import com.xiaoxin.update.task.download.DownloadApkOrPatch;
 import com.xiaoxin.update.util.GetAppInfo;
+import com.xiaoxin.update.util.ThreadTask;
 import com.xiaoxin.update.util.UpdateLog;
 
 /**
@@ -41,7 +42,7 @@ public class UpdateDialog {
                 setMessage(updateInfo).setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                new Thread(new DownloadApkOrPatch(context, versionInfo)).start();
+                ThreadTask.execute(new DownloadApkOrPatch(context, versionInfo));
                 dialog.dismiss();
             }
         }).setNegativeButton("取消", new DialogInterface.OnClickListener() {

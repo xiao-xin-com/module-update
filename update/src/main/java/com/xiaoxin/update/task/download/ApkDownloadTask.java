@@ -12,6 +12,7 @@ import com.xiaoxin.update.listener.OnDownloadListener;
 import com.xiaoxin.update.task.install.InstallApkThread;
 import com.xiaoxin.update.util.GetAppInfo;
 import com.xiaoxin.update.util.SignUtils;
+import com.xiaoxin.update.util.ThreadTask;
 import com.xiaoxin.update.util.UpdateLog;
 import com.xiaoxin.update.util.UpdateUtil;
 
@@ -90,12 +91,12 @@ class ApkDownloadTask {
         @Override
         public void completed(final com.liulishuo.filedownloader.BaseDownloadTask task) {
             super.completed(task);
-            new Thread(new Runnable() {
+            ThreadTask.execute(new Runnable() {
                 @Override
                 public void run() {
                     installApk();
                 }
-            }).start();
+            });
         }
     }
 

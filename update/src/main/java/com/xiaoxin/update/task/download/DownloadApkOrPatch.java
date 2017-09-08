@@ -7,6 +7,7 @@ import com.xiaoxin.update.bean.VersionInfo;
 import com.xiaoxin.update.listener.OnDownloadListener;
 import com.xiaoxin.update.task.install.InstallApkThread;
 import com.xiaoxin.update.util.SignUtils;
+import com.xiaoxin.update.util.ThreadTask;
 import com.xiaoxin.update.util.UpdateLog;
 
 import java.io.File;
@@ -61,7 +62,7 @@ public class DownloadApkOrPatch implements Runnable {
                         "本地文件已存在，而且和服务器的md5匹配，直接安装");
                 InstallApkThread installApkThread =
                         new InstallApkThread(context, versionInfo);
-                new Thread(installApkThread).start();
+                ThreadTask.submit(installApkThread);
                 return;
             } else if (file.delete()) {
                 UpdateLog.d("DownloadApkOrPatch download() " +
