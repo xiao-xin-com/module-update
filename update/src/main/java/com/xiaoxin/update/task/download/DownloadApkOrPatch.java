@@ -77,8 +77,9 @@ public class DownloadApkOrPatch implements Runnable {
         if (status == UpdateStatus.STATUS_DOWNLOAD_PATCH_START ||
                 status == UpdateStatus.STATUS_DOWNLOADING_PATCH ||
                 status == UpdateStatus.STATUS_DOWNLOAD_START ||
-                status == UpdateStatus.STATUS_DOWNLOADING) {
-            UpdateLog.d("DownloadApkOrPatch download() 当前有下载任务正在进行");
+                status == UpdateStatus.STATUS_DOWNLOADING ||
+                status == UpdateStatus.STATUS_INSTALL_START) {
+            UpdateLog.d("DownloadApkOrPatch download() 当前有下载或安装任务正在进行");
             return;
         }
         if (UpdateManager.isIncrement()) {

@@ -14,12 +14,12 @@ public class UpdateStatusChangeObserver extends Observable<OnUpdateStatusChangeL
 
     @Override
     public void onUpdateStatusChange(final int status) {
+        CurrentStatus.setStatus(status);
         UITask.post(new Runnable() {
             @Override
             public void run() {
                 synchronized (mObservers) {
                     UpdateLog.i("onUpdateStatusChange() called with: status = [" + status + "]");
-                    CurrentStatus.setStatus(status);
                     for (int i = mObservers.size() - 1; i >= 0; i--) {
                         mObservers.get(i).onUpdateStatusChange(status);
                     }
