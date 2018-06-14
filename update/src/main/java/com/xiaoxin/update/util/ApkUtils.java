@@ -15,9 +15,9 @@ import java.util.List;
 /**
  * 类说明：  Apk工具类
  *
- * @author  Cundong
+ * @author Cundong
  * @version 1.1
- * @date    2013-9-6
+ * @date 2013-9-6
  */
 public class ApkUtils {
 
@@ -99,5 +99,14 @@ public class ApkUtils {
                 "application/vnd.android.package-archive");
 
         context.startActivity(intent);
+    }
+
+    public static Intent getInstallIntent(String apkPath) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setDataAndType(Uri.parse("file://" + apkPath),
+                "application/vnd.android.package-archive");
+
+        return intent;
     }
 }

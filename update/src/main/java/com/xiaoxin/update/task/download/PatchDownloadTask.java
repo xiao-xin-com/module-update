@@ -1,19 +1,23 @@
 package com.xiaoxin.update.task.download;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
 
 import com.xiaoxin.update.UpdateManager;
+import com.xiaoxin.update.bean.AppInfo;
 import com.xiaoxin.update.bean.PatchInfo;
 import com.xiaoxin.update.bean.PatchUrl;
 import com.xiaoxin.update.bean.VersionInfo;
 import com.xiaoxin.update.helper.DispatchDownloadEvent;
+import com.xiaoxin.update.helper.DispatchPatchEvent;
 import com.xiaoxin.update.listener.DispatchFileDownloadListener;
 import com.xiaoxin.update.listener.OnDownloadListener;
-import com.xiaoxin.update.listener.simple.SimplePatchListener;
 import com.xiaoxin.update.task.install.InstallApkThread;
 import com.xiaoxin.update.task.patch.PatchTask;
 import com.xiaoxin.update.util.ApkUtils;
+import com.xiaoxin.update.util.NotifyUtil;
 import com.xiaoxin.update.util.SignUtils;
 import com.xiaoxin.update.util.ThreadTask;
 import com.xiaoxin.update.util.UpdateLog;
@@ -118,16 +122,21 @@ class PatchDownloadTask {
         public void completed(final com.liulishuo.filedownloader.BaseDownloadTask task) {
             super.completed(task);
             UpdateLog.d("PatchDownloadTask patchApk() 下载完成");
+            final int taskId = task.getId();
             ThreadTask.execute(new Runnable() {
                 @Override
                 public void run() {
-                    patchApk();
+                    patchApk(taskId);
                 }
             });
         }
     }
 
     private void patchApk() {
+        patchApk(0);
+    }
+
+    private void patchApk(final int notifyId) {
         UpdateLog.d("PatchDownloadTask patchApk() called");
         final String patchPath = UpdateManager.getPatchTargetFile();
         if (!SignUtils.checkMd5(patchPath, patchUrl.getMd5())) {
@@ -135,16 +144,36 @@ class PatchDownloadTask {
             downloadApk();
             return;
         }
+
         String oldApkPath = ApkUtils.getSourceApkPath(context, context.getPackageName());
         String newApkPath = UpdateManager.getTargetFile();
         PatchTask patchTask = new PatchTask(oldApkPath, newApkPath, patchPath);
-        patchTask.setOnPatchListener(new SimplePatchListener() {
+        patchTask.setOnPatchListener(new DispatchPatchEvent(context, notifyId) {
             @Override
             public void onComplete(PatchInfo patchInfo) {
                 super.onComplete(patchInfo);
                 if (SignUtils.checkMd5(patchInfo.getNewFile(), versionInfo.getMd5checksum())) {
                     new InstallApkThread(context, versionInfo).run();
+
+                    if (UpdateManager.isShowUI() && !UpdateManager.isSilence()) {
+
+                        Intent intent = ApkUtils.getInstallIntent(patchInfo.getNewFile());
+                        PendingIntent pendingIntent = PendingIntent.getActivity(context, notifyId, intent, 0);
+                        AppInfo appInfo = getAppInfo();
+                        NotifyUtil.create(context, notifyId).notify_progress(pendingIntent,
+                                appInfo.getApplicationIcon(), "组合增量包",
+                                appInfo.getApplicationLabel(), "点击安装",
+                                false, false, false, 100, 100, false);
+
+                    }
                 } else {
+                    AppInfo appInfo = getAppInfo();
+                    if (UpdateManager.isShowUI() && !UpdateManager.isSilence()) {
+                        NotifyUtil.create(context, notifyId).notify_progress(null,
+                                appInfo.getApplicationIcon(), "组合增量包",
+                                appInfo.getApplicationLabel(), "md5校验失败，将为您下载整包升级",
+                                false, false, false, 100, 100, false);
+                    }
                     UpdateLog.d("PatchDownloadTask patchApk onComplete : md5不匹配");
                     if (new File(patchInfo.getNewFile()).delete()) {
                         UpdateLog.d("PatchDownloadTask isNeedDownload: 删除组合失败的apk，" +

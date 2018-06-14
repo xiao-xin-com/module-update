@@ -3,13 +3,13 @@ package com.xiaoxin.update.helper;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.xiaoxin.update.UpdateManager;
 import com.xiaoxin.update.bean.AppInfo;
 import com.xiaoxin.update.listener.OnDownloadListener;
 import com.xiaoxin.update.listener.UpdateStatus;
+import com.xiaoxin.update.util.ApkUtils;
 import com.xiaoxin.update.util.NotifyUtil;
 import com.xiaoxin.update.util.UpdateLog;
 
@@ -61,9 +61,7 @@ public class DispatchDownloadEvent {
     public void completed(BaseDownloadTask task) {
         UpdateLog.d("completed() called with: task = [" + task + "]");
         if (UpdateManager.isShowUI() && !UpdateManager.isSilence()) {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setDataAndType(Uri.parse("file://" + task.getPath()), "application/vnd.android.package-archive");
+            Intent intent = ApkUtils.getInstallIntent(task.getTargetFilePath());
             PendingIntent pendingIntent = PendingIntent.getActivity(context, task.getId(), intent, 0);
             NotifyUtil.create(context, task.getId()).notify_progress(type == TYPE_APK ? pendingIntent : null,
                     applicationIcon, "开始升级", applicationLabel, "下载完成", false, false, false, 100, 100, false);
