@@ -3,28 +3,26 @@ package com.xiaoxin.update.net;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.StringRequest;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by liyuanbiao on 2016/9/18.
  */
 
-public class UpdateStringRequest extends com.android.volley.toolbox.StringRequest {
-    public UpdateStringRequest(int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
-        super(method, url, listener, errorListener);
-    }
+public class UpdateStringRequest extends StringRequest {
 
-    public UpdateStringRequest(String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
-        super(url, listener, errorListener);
+    public UpdateStringRequest(
+            String url,
+            Response.Listener<String> listener,
+            Response.ErrorListener errorListener) {
+        super(Method.GET, url, listener, errorListener);
     }
 
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
-        try {
-            return Response.success(new String(response.data, "UTF-8"), HttpHeaderParser.parseCacheHeaders(response));
-        } catch (UnsupportedEncodingException e) {
-            return Response.success(new String(response.data), HttpHeaderParser.parseCacheHeaders(response));
-        }
+        return Response.success(new String(response.data, StandardCharsets.UTF_8),
+                HttpHeaderParser.parseCacheHeaders(response));
     }
 }

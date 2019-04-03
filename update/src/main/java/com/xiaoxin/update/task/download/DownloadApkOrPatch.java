@@ -64,7 +64,7 @@ public class DownloadApkOrPatch implements Runnable {
                         "本地文件已存在，而且和服务器的md5匹配，直接安装");
                 InstallApkThread installApkThread =
                         new InstallApkThread(context, versionInfo);
-                ThreadTask.submit(installApkThread);
+                ThreadTask.execute(installApkThread);
                 return;
             } else if (file.delete()) {
                 UpdateLog.d("DownloadApkOrPatch download() " +

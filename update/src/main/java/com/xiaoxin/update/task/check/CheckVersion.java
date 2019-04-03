@@ -142,7 +142,7 @@ public class CheckVersion {
         }
 
         if (UpdateManager.isSilence()) {
-            ThreadTask.submit(new DownloadApkOrPatch(context, versionInfo));
+            ThreadTask.execute(new DownloadApkOrPatch(context, versionInfo));
         } else {
             UpdateDialog updateDialog = new UpdateDialog(context, versionInfo);
             updateDialog.showUpdateDialog();

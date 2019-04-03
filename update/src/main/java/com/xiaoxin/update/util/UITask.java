@@ -3,25 +3,40 @@ package com.xiaoxin.update.util;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.util.concurrent.Executor;
+
 /**
  * Created by liyuanbiao on 2016/9/18.
  */
 
-public class UITask {
-    private static final Handler handler = new Handler(Looper.getMainLooper());
-
+public final class UITask {
     private UITask() {
+        throw new IllegalAccessError("UITask 不能实例化");
     }
 
-    public static void post(Runnable runnable) {
-        handler.post(runnable);
-    }
+    private static final Executor MAIN_EXECUTOR = new Executor() {
+        private final Handler handler =
+                new Handler(Looper.getMainLooper());
 
-    public static void autoPost(Runnable runnable) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            runnable.run();
-        } else {
-            handler.post(runnable);
+        @Override
+        public void execute(Runnable command) {
+            handler.post(command);
         }
+    };
+
+    public static void post(Runnable command) {
+        MAIN_EXECUTOR.execute(command);
+    }
+
+    public static void autoPost(Runnable command) {
+        if (isUIThread()) {
+            command.run();
+        } else {
+            post(command);
+        }
+    }
+
+    private static boolean isUIThread() {
+        return Looper.myLooper() == Looper.getMainLooper();
     }
 }
