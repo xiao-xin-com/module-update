@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion compile_sdk_version
-    buildToolsVersion build_tools_version
+    compileSdkVersion build_versions.compile_sdk
+    buildToolsVersion build_versions.build_tools
 
     //签名
     signingConfigs {
@@ -20,11 +20,11 @@ android {
 
     defaultConfig {
         applicationId "com.xiaoxin.bootloader"
-        minSdkVersion min_sdk_version
-        targetSdkVersion target_sdk_version
+        minSdkVersion build_versions.min_sdk
+        targetSdkVersion build_versions.target_sdk
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -65,12 +65,13 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestImplementation(deps.test.espresso_core, {
         exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.annotation', module: 'annotation'
     })
-    implementation "com.android.support:appcompat-v7:$support_version"
-    testImplementation 'junit:junit:4.12'
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation deps.androidx.appcompat
+    testImplementation deps.test.junit
+    implementation deps.gson
 
     implementation project(':update')
 }

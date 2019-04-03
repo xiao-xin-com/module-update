@@ -2,7 +2,6 @@ package com.xiaoxin.update.ui;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
 
 import com.xiaoxin.update.UpdateManager;
 import com.xiaoxin.update.bean.VersionInfo;
@@ -10,6 +9,8 @@ import com.xiaoxin.update.task.download.DownloadApkOrPatch;
 import com.xiaoxin.update.util.GetAppInfo;
 import com.xiaoxin.update.util.ThreadTask;
 import com.xiaoxin.update.util.UpdateLog;
+
+import androidx.appcompat.app.AlertDialog;
 
 /**
  * Created by liyuanbiao on 2017/9/7.

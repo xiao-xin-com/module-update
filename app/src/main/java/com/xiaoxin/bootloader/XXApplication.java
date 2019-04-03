@@ -57,7 +57,7 @@ public class XXApplication extends Application {
     }
 
     public static String getUpdateUrl(Context context, String model) {
-        return new StringBuilder("http://192.168.1.21/appVersion/verify?")
+        return new StringBuilder("http://192.168.1.77:1337/appVersion/verify?")
                 .append("packageName=").append(GetAppInfo.getAppPackageName(context))
                 .append("&platform=Android&versionCode=")
                 .append(GetAppInfo.getAppVersionCode(context))

@@ -1,0 +1,29 @@
+def versions = [:]
+versions.gradle_plugin = '3.3.2'
+
+def deps = [:]
+ext.deps = deps
+
+def android = [:]
+android.gradle_plugin = "com.android.tools.build:gradle:$versions.gradle_plugin"
+deps.android = android
+
+deps.gson = "com.google.code.gson:gson:2.8.5"
+deps.volley = "com.android.volley:volley:1.1.1"
+deps.filedownloader = "com.liulishuo.filedownloader:library:1.7.5"
+
+def test = [:]
+test.junit = "junit:junit:4.12"
+test.espresso_core = "androidx.test.espresso:espresso-core:3.1.0-alpha4"
+deps.test = test
+
+def androidx = [:]
+androidx.appcompat = "androidx.appcompat:appcompat:1.0.2"
+deps.androidx = androidx
+
+def build_versions = [:]
+build_versions.compile_sdk = 28
+build_versions.build_tools = "28.0.3"
+build_versions.min_sdk = 19
+build_versions.target_sdk = 22
+ext.build_versions = build_versions
