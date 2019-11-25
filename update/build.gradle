@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-group = 'com.github.mliyuanbiao'
+group = 'com.github.xiao-xin-com'
 
 android {
     resourcePrefix 'update_'
